@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Scott Carleton"]
   s.date = "2013-07-26"
-  s.description = "A FilePicker / PaperClip mashup.  Use Filepicker for uploads and paperclip to process them.  Works with Resque & Delayed Paperclip"
+  s.description = "NO CODE WRITTEN YET: A FilePicker / PaperClip mashup.  Use Filepicker for uploads and paperclip to process them.  Works with Resque & Delayed Paperclip"
   s.email = "scott@artsicle.com"
   s.extra_rdoc_files = [
     "LICENSE",
