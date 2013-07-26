@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Scott Carleton"]
   s.date = "2013-07-26"
-  s.description = "A FilePicker / PaperClip mashup.  Use Filepicker for uploads and paperclip to process them.  Works with Resque & Delayed Paperclip"
+  s.description = "TODO: longer description of your gem"
   s.email = "scott@artsicle.com"
   s.extra_rdoc_files = [
     "LICENSE",
@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
   s.rubygems_version = "2.0.3"
-  s.summary = "A FilePicker / PaperClip mashup."
+  s.summary = "TODO: one-line summary of your gem"
 
   if s.respond_to? :specification_version then
     s.specification_version = 4
