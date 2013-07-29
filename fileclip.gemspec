@@ -29,6 +29,14 @@ Gem::Specification.new do |s|
   s.rubygems_version = "2.0.3"
   s.summary = "A FilePicker / PaperClip mashup."
 
-  s.add_dependency(%q<rake>, [">= 0"])
+  s.add_dependency 'paperclip', [">= 3.3.0"]
+
+  s.add_development_dependency "rspec"
+  s.add_development_dependency 'sqlite3'
+  s.add_development_dependency "activerecord"
+  s.add_development_dependency 'delayed_job'
+  s.add_development_dependency 'resque'
+  s.add_development_dependency 'sidekiq'
+
 end
 
