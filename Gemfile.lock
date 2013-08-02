@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     fileclip (0.0.2)
+      paperclip
       paperclip (>= 3.3.0)
 
 GEM
@@ -23,44 +24,25 @@ GEM
       multi_json (~> 1.0)
     arel (3.0.2)
     builder (3.0.4)
-    celluloid (0.14.1)
-      timers (>= 1.0.0)
     climate_control (0.0.3)
       activesupport (>= 3.0)
     cocaine (0.5.1)
       climate_control (>= 0.0.3, < 1.0)
-    connection_pool (1.1.0)
-    delayed_job (3.0.5)
-      activesupport (~> 3.0)
     diff-lcs (1.2.4)
     i18n (0.6.4)
-    json (1.8.0)
     mime-types (1.23)
-    mono_logger (1.1.0)
     multi_json (1.7.7)
     paperclip (3.5.0)
       activemodel (>= 3.0.0)
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.0)
       mime-types
-    rack (1.5.2)
-    rack-protection (1.5.0)
-      rack
     rails (0.9.5)
       actionmailer (>= 0.6.1)
       actionpack (>= 1.4.0)
       activerecord (>= 1.6.0)
       rake (>= 0.4.15)
     rake (10.1.0)
-    redis (3.0.4)
-    redis-namespace (1.3.0)
-      redis (~> 3.0.0)
-    resque (1.24.1)
-      mono_logger (~> 1.0)
-      multi_json (~> 1.0)
-      redis-namespace (~> 1.2)
-      sinatra (>= 0.9.2)
-      vegas (~> 0.1.2)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
@@ -69,32 +51,16 @@ GEM
     rspec-expectations (2.14.0)
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.1)
-    sidekiq (2.13.0)
-      celluloid (>= 0.14.1)
-      connection_pool (>= 1.0.0)
-      json
-      redis (>= 3.0)
-      redis-namespace
-    sinatra (1.4.3)
-      rack (~> 1.4)
-      rack-protection (~> 1.4)
-      tilt (~> 1.3, >= 1.3.4)
     sqlite3 (1.3.7)
-    tilt (1.4.1)
-    timers (1.1.0)
     tzinfo (0.3.37)
-    vegas (0.1.11)
-      rack (>= 1.0.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   activerecord
-  delayed_job
   fileclip!
+  paperclip
   rails
-  resque
   rspec
-  sidekiq
   sqlite3

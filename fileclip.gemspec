@@ -34,9 +34,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec"
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency "activerecord"
-  s.add_development_dependency 'delayed_job'
-  s.add_development_dependency 'resque'
-  s.add_development_dependency 'sidekiq'
+  s.add_development_dependency "paperclip"
 
+  s.add_runtime_dependency "paperclip"
 end
 
