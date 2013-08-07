@@ -1,6 +1,6 @@
 module FileClip
-  module Rails
-    module ViewHelpers
+  module ActionView
+    module Helpers
 
       # Include relevant JS
       def fileclip_js_include_tag

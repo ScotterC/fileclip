@@ -24,6 +24,7 @@
 #
 # Queue job for image assignment
 
+require 'fileclip/action_view/helpers'
 require 'fileclip/railtie'
 require 'rest-client'
 

@@ -2,6 +2,6 @@ source "http://rubygems.org"
 
 gemspec
 
-gem 'rails'
+gem 'rails', "3.2.14"
 gem 'byebug'
 

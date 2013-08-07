@@ -1,9 +1,11 @@
-require 'rubygems'
-require 'bundler/setup'
-Bundler.require(:default, :development)
+require 'rubygems' unless defined? Gem
+require 'bundler'
+Bundler.setup
 
 # Prepare activerecord
-require "active_record"
+# require "active_record"
+require 'rails/all'
+require 'byebug'
 
 # Connect to sqlite
 ActiveRecord::Base.establish_connection(
@@ -14,8 +16,10 @@ ActiveRecord::Base.establish_connection(
 ActiveRecord::Migration.verbose = false
 load(File.join(File.dirname(__FILE__), 'schema.rb'))
 
+require 'paperclip'
 ActiveRecord::Base.send(:include, Paperclip::Glue)
 
+require 'fileclip'
 ActiveRecord::Base.send(:include, FileClip::Glue)
 
 
