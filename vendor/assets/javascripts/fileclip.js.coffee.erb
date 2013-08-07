@@ -1,0 +1,51 @@
+class window.FileClip
+  _clicked_button: ""
+
+  constructor: ->
+    filepicker.setKey('<%= FileClip.options[:filepicker_key] %>');
+
+  # For filepicker_helper
+  # Accepts button that to be clicked and optional callback
+  button: (target, callback) ->
+    $(document).on "click", target, =>
+      @buttonHandler(target, callback)
+
+  # Handler to set which button was clicked and to pass on callback
+  # To puicker
+  buttonHandler: (target, callback) ->
+    @_clicked_button = $(target)
+    @picker(callback)
+
+  picker: (callback) =>
+    filepicker.pickAndStore
+      mimetypes: "image/*"
+      container: "modal"
+      service: "COMPUTER"
+      maxSize: (20 * 1024 * 1024)
+    ,
+      location: "S3"
+      path: "/fileclip/"
+      access: 'public'
+    , (fpfile) =>
+      @imageHandler fpfile, callback
+    , (error) =>
+      console.log error.code
+
+  # Accepts a filepicker file and optional callback
+  # Passes file and button clicked to a callback
+  # Target if passed in
+  # id to look up the link where it should be going
+  # or clicked button's next input
+  imageHandler: (fpfile, callback, target) ->
+    file = fpfile[0]
+    if not @_clicked_button
+      $(target).find(".js-fileclip_url").val file.url
+    else if @_clicked_button.data("id")
+      $("##{@_clicked_button.data("id")}").next(".js-fileclip_url").val file.url
+    else
+      @_clicked_button.next(".js-fileclip_url").val file.url
+
+    callback(file, @_clicked_button) if callback
+
+
+

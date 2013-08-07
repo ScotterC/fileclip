@@ -1,10 +1,11 @@
 module FileClip
   module Rails
-
     module ViewHelpers
+
+      # Include relevant JS
       def fileclip_js_include_tag
         javascript_include_tag "//api.filepicker.io/v1/filepicker.js"
-        javascript_include_tag "my coffee placeholder"
+        javascript_include_tag "fileclip"
       end
 
       # Options
@@ -18,6 +19,7 @@ module FileClip
         fileclip_link_builder(link, form_object, options, id)
       end
 
+      # Add js-fileclip to existing classes
       def fileclip_css_classes(given_classes)
         return "js-fileclip" if given_classes.nil?
         css_classes = [].push(given_classes.split)
@@ -25,6 +27,7 @@ module FileClip
         css_classes
       end
 
+      # Object id for link
       def fileclip_id(form_object)
         new_object = form_object.object
         attachment_name = new_object.attachment_name
@@ -41,22 +44,18 @@ module FileClip
       end
 
       # Options
-      # Required to require first field
       # Activate (defaults to true) to set own javascript
       def fileclip_link_builder(link, form_object, options, id)
-        required = options[:required]
-
         # Get attachment name
         attachment_name = form_object.object.attachment_name
 
         js = activation(options[:js], id)
 
-        js + link +
-        form_object.hidden_field(:filepicker_url, class: "js-fileclip_url #{'required' if required}", data: { type: attachment_name})
+        js + link + form_object.hidden_field(:filepicker_url,
+                                              class: "js-fileclip_url",
+                                              data: { type: attachment_name})
       end
 
     end
-
   end
-
 end
