@@ -2,7 +2,7 @@ class window.FileClip
   _clicked_button: ""
 
   constructor: ->
-    filepicker.setKey('<%= FileClip.options[:filepicker_key] %>');
+    filepicker.setKey('<%= FileClip.configuration.filepicker_key %>');
 
   # For filepicker_helper
   # Accepts button that to be clicked and optional callback

@@ -23,18 +23,12 @@
 # Add delayed aspect
 #
 # Queue job for image assignment
-
+require "fileclip/configuration"
 require 'fileclip/action_view/helpers'
 require 'fileclip/railtie'
 require 'rest-client'
 
 module FileClip
-
-  class << self
-    def options
-      { :filepicker_key => nil }
-    end
-  end
 
   module Glue
     def self.included(base)

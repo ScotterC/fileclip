@@ -5,12 +5,6 @@ describe FileClip do
   let(:image) { Image.new }
   let(:uri) { URI.parse(filepicker_url) }
 
-  describe ".options" do
-    it ".options returns basic options" do
-      FileClip.options.should == { :filepicker_key => nil }
-    end
-  end
-
   describe "glue" do
     describe "add_callbacks" do
       it "should register callback when called" do
