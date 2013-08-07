@@ -1,10 +1,11 @@
 PATH
   remote: .
   specs:
-    fileclip (0.0.2)
+    fileclip (0.0.3)
       paperclip
       paperclip (>= 3.3.0)
       railties (>= 3.0)
+      rest-client
 
 GEM
   remote: http://rubygems.org/
@@ -118,8 +119,6 @@ PLATFORMS
 DEPENDENCIES
   byebug
   fileclip!
-  paperclip
   rails (= 3.2.14)
-  rest-client
   rspec
   sqlite3

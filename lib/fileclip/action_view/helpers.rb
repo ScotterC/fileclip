@@ -4,14 +4,13 @@ module FileClip
 
       # Include relevant JS
       def fileclip_js_include_tag
-        javascript_include_tag "//api.filepicker.io/v1/filepicker.js"
-        javascript_include_tag "fileclip"
+        javascript_include_tag "//api.filepicker.io/v1/filepicker.js", "fileclip"
       end
 
       # Options
       # js to activate it on the spot, defaults to true
       # class to add css classes
-      def link_to_fileclip(text, form_object, options)
+      def link_to_fileclip(text, form_object, options={})
         id = fileclip_id(form_object)
         classes = fileclip_css_classes(options[:class])
         link = link_to text, "javascript:void(0)", class: classes, id: id

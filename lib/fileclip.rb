@@ -23,8 +23,9 @@
 # Add delayed aspect
 #
 # Queue job for image assignment
-require "fileclip/configuration"
+require 'fileclip/configuration'
 require 'fileclip/action_view/helpers'
+require 'fileclip/engine'
 require 'fileclip/railtie'
 require 'rest-client'
 
@@ -54,10 +55,12 @@ module FileClip
     end
 
     def paperclip_definitions
-      @paperclip_definitions ||= if respond_to? :attachment_definitions
+      @paperclip_definitions ||= if Paperclip::VERSION.to_f < 3.5
         attachment_definitions
-      else
+      elsif Paperclip::VERSION == "3.5.0"
         Paperclip::Tasks::Attachments.definitions_for(self)
+      else
+        Paperclip::AttachmentRegistry.definitions_for(self)
       end
     end
   end

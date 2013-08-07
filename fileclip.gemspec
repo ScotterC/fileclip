@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
     "LICENSE",
     "README.md",
     "Rakefile",
-    "VERSION",
     "fileclip.gemspec",
     "lib/fileclip.rb",
     "lib/fileclip/version.rb"
@@ -30,12 +29,11 @@ Gem::Specification.new do |s|
   s.summary = "A FilePicker / PaperClip mashup."
 
   s.add_dependency 'paperclip', [">= 3.3.0"]
+  s.add_dependency 'rest-client'
 
   s.add_development_dependency "rspec"
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency "rails"
-  s.add_development_dependency "paperclip"
-  s.add_development_dependency "rest-client"
   s.add_runtime_dependency(%q<railties>, [">= 3.0"])
 
   s.add_runtime_dependency "paperclip"
