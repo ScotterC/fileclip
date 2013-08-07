@@ -16,6 +16,9 @@ load(File.join(File.dirname(__FILE__), 'schema.rb'))
 
 ActiveRecord::Base.send(:include, Paperclip::Glue)
 
+ActiveRecord::Base.send(:include, FileClip::Glue)
+
+
 class Image < ActiveRecord::Base
 
   has_attached_file :attachment,

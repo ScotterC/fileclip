@@ -4,7 +4,7 @@ module FileClip
     module ViewHelpers
       def fileclip_js_include_tag
         javascript_include_tag "//api.filepicker.io/v1/filepicker.js"
-        javascript_include_tag "my cofee"
+        javascript_include_tag "my coffee placeholder"
       end
 
       # Options

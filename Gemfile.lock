@@ -24,10 +24,15 @@ GEM
       multi_json (~> 1.0)
     arel (3.0.2)
     builder (3.0.4)
+    byebug (1.6.1)
+      columnize (~> 0.3.6)
+      debugger-linecache (~> 1.2.0)
     climate_control (0.0.3)
       activesupport (>= 3.0)
     cocaine (0.5.1)
       climate_control (>= 0.0.3, < 1.0)
+    columnize (0.3.6)
+    debugger-linecache (1.2.0)
     diff-lcs (1.2.4)
     i18n (0.6.4)
     mime-types (1.23)
@@ -43,6 +48,8 @@ GEM
       activerecord (>= 1.6.0)
       rake (>= 0.4.15)
     rake (10.1.0)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
@@ -59,8 +66,10 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord
+  byebug
   fileclip!
   paperclip
   rails
+  rest-client
   rspec
   sqlite3

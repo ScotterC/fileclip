@@ -25,7 +25,7 @@
 # Queue job for image assignment
 
 require 'fileclip/railtie'
-#require 'rest-client'
+require 'rest-client'
 
 module FileClip
 
@@ -47,15 +47,23 @@ module FileClip
     def add_callbacks
       attr_accessible :filepicker_url
 
-      if respond_to?(:after_commit)
+      # if respond_to?(:after_commit)
         after_commit  :update_from_filepicker!
-      else
-        after_save    :update_from_filepicker!
-      end
+      # else
+      #   after_save    :update_from_filepicker!
+      # end
 
       # TODO:
       # skip validates_attachment_presence if filepicker url present
       # Save without this particular vaildation
+    end
+
+    def paperclip_definitions
+      @paperclip_definitions ||= if respond_to? :attachment_definitions
+        attachment_definitions
+      else
+        Paperclip::Tasks::Attachments.definitions_for(self)
+      end
     end
   end
 
@@ -63,7 +71,7 @@ module FileClip
 
     # TODO: can't handle multiples, just first
     def attachment_name
-      @attachment_name ||= attachment_definitions.keys.first
+      @attachment_name ||= self.class.paperclip_definitions.keys.first
     end
 
     def attachment_object
@@ -104,6 +112,8 @@ module FileClip
       previous_changes.keys.include?('filepicker_url')
     end
 
+    # To be overridden in model if specific logic for not
+    # processing the image
     def filepicker_only?
       false
     end

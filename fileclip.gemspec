@@ -35,6 +35,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency "activerecord"
   s.add_development_dependency "paperclip"
+  s.add_development_dependency "rest-client"
+
 
   s.add_runtime_dependency "paperclip"
 end
