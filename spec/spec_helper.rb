@@ -6,6 +6,8 @@ Bundler.setup
 # require "active_record"
 require 'rails/all'
 
+require 'byebug'
+
 # Connect to sqlite
 ActiveRecord::Base.establish_connection(
   "adapter" => "sqlite3",
@@ -28,5 +30,7 @@ class Image < ActiveRecord::Base
     :storage => :filesystem,
     :path => "./spec/tmp/:style/:id.:extension",
     :url => "./spec/tmp/:style/:id.extension"
+
+  fileclip :attachment
 
 end

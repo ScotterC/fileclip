@@ -5,6 +5,7 @@ module FileClip
     # Will require restart of server for it to pick up the class on edit
     def self.insert
       ::ActiveRecord::Base.send(:include, FileClip::Glue)
+      ::Paperclip::Validators::ClassMethods.send(:include, FileClip::Validators)
     end
   end
 end

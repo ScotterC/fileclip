@@ -1,10 +1,6 @@
 TODO:
 
 Backend:
-* It should be unobtrusive.  Normal paperclip uploads should work
-* If filepicker_url is present it should process it
-* If filepicker_url changes, it should process it
-* First version should be minimal
 * Handle skipping validations of attachment seamlessly
 * handle multiple attachments on a model, prefix column with attachment name
 * create generator for migration
@@ -24,8 +20,8 @@ Extra features:
 * Work with Resque
 * Work with DelayedJob
 * Work with Sidekiq
-* Handle multiple attachments on the same model
 * Fallback to filepicker url if paperclip url doesn't exist
 * Filepicker converts to match paperclip styles
 * Configure Filepicker options
 * FilePicker droppane support
+

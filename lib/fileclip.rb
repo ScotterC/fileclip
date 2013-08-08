@@ -25,6 +25,7 @@
 # Queue job for image assignment
 require 'fileclip/configuration'
 require 'fileclip/action_view/helpers'
+require 'fileclip/validators'
 require 'fileclip/engine'
 require 'fileclip/railtie'
 require 'rest-client'
@@ -35,23 +36,18 @@ module FileClip
     def self.included(base)
       base.extend(ClassMethods)
       base.send :include, InstanceMethods
-      base.add_callbacks
     end
   end
 
   module ClassMethods
-    def add_callbacks
+    def fileclip(name)
       attr_accessible :filepicker_url
 
       # if respond_to?(:after_commit)
-        after_commit  :update_from_filepicker!
+      after_commit  :update_from_filepicker!
       # else
       #   after_save    :update_from_filepicker!
       # end
-
-      # TODO:
-      # skip validates_attachment_presence if filepicker url present
-      # Save without this particular vaildation
     end
 
     def paperclip_definitions

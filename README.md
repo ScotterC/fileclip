@@ -31,6 +31,17 @@ FileClip.configure do |config|
 end
 ````
 
+### In Model
+````
+# models/image.rb
+class Image << ActiveRecord::Base
+
+  has_attached_file :attachment
+
+  fileclip :attachment
+end
+````
+
 ### In View
 ````
 # Loads Filepicker js, and FileClip js
@@ -55,3 +66,6 @@ end
 * location is S3
 * path is "/fileclip"
 * access is public
+
+Features:
+* Unobtrusive.  Normal paperclip uploads still work
