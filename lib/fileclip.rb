@@ -1,28 +1,3 @@
-# TODO
-#
-# Allowance for normal attached images through file_field:
-#  only do attachment validation if it's there if remote url is not present
-#  only do process_in_background if remote_url is not present
-#
-# Expose FilePicked to all classes that have Paperclip images
-#
-# Handle multiple attachments in single model
-#  Crux of this is finding the name of the attachment we're dealing with
-#
-# Fallback if none are defined
-#
-# What can we separate out into it's own class
-# What should be a part of attachment
-#
-# Migration generator
-#
-# Configuration to take Filepicker API key
-#
-# Javascript inclusion
-#
-# Add delayed aspect
-#
-# Queue job for image assignment
 require 'fileclip/configuration'
 require 'fileclip/action_view/helpers'
 require 'fileclip/validators'
@@ -41,13 +16,11 @@ module FileClip
 
   module ClassMethods
     def fileclip(name)
+      extend FileClip::Validators::ClassMethods
+
       attr_accessible :filepicker_url
 
-      # if respond_to?(:after_commit)
       after_commit  :update_from_filepicker!
-      # else
-      #   after_save    :update_from_filepicker!
-      # end
     end
 
     def paperclip_definitions

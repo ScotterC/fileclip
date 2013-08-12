@@ -6,10 +6,6 @@ module FileClip
           FileClip::Railtie.insert
         end
       end
-
-      initializer "fileclip_rails.view_helpers" do
-        ::ActionView::Base.send(:include, FileClip::ActionView::Helpers)
-      end
     end
   end
 end

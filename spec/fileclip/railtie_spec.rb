@@ -1,4 +1,5 @@
 require 'spec_helper'
+
 describe FileClip::Railtie do
   describe "insert" do
     it "should include the glue" do
