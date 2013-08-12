@@ -1,7 +1,6 @@
 TODO:
 
 Backend:
-* Handle skipping validations of attachment seamlessly
 * handle multiple attachments on a model, prefix column with attachment name
 * create generator for migration
 * create generator for intializer

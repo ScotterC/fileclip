@@ -69,3 +69,16 @@ end
 
 Features:
 * Unobtrusive.  Normal paperclip uploads still work
+
+
+#### Gotchas
+
+This paperclip validation will return errors even if filepicker url is present:
+````
+  validates :attachment, :attachment_presence => true
+````
+
+However, these will work fine:
+````
+  validates_attachment :attachment, :size => { :in => 0..1000 }, :presence => true
+````

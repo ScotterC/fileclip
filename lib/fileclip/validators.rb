@@ -1,12 +1,21 @@
 module FileClip
   module Validators
 
-    module ClassMethods
+    module HelperMethods
 
-      # Only run validations if filepicker_url not present
-      def validates_attachment(*attributes)
-        attributes.last.merge!({ :if => :filepicker_url_not_present? })
-        super(*attributes)
+      def validates_attachment_content_type(*attr_names)
+        attr_names.last.merge!({ :if => :filepicker_url_not_present? })
+        super(*attr_names)
+      end
+
+      def validates_attachment_presence(*attr_names)
+        attr_names.last.merge!({ :if => :filepicker_url_not_present? })
+        super(*attr_names)
+      end
+
+      def validates_attachment_size(*attr_names)
+        attr_names.last.merge!({ :if => :filepicker_url_not_present? })
+        super(*attr_names)
       end
 
     end

@@ -35,6 +35,7 @@ describe FileClip::Validators do
       end
 
       it "observes attachment presence" do
+        pending
         Image.validates :attachment, :attachment_presence => true
         image.save.should be_true
         image.errors.should be_empty

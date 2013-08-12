@@ -16,7 +16,7 @@ module FileClip
 
   module ClassMethods
     def fileclip(name)
-      extend FileClip::Validators::ClassMethods
+      extend FileClip::Validators::HelperMethods
 
       attr_accessible :filepicker_url
 
