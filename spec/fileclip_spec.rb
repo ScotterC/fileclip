@@ -27,10 +27,20 @@ describe FileClip do
         Image.fileclip(:attachment) # set it back for other tests
       end
     end
+
+    describe "resque_enabled?" do
+      it "returns false by default" do
+        FileClip.resque_enabled?.should be_false
+      end
+
+      it "returns true if resque exists" do
+        stub_const "Resque", Class.new
+        FileClip.resque_enabled?.should be_true
+      end
+    end
   end
 
   describe "instance methods" do
-
     context "#attachment_name" do
       context "image" do
         it "should return :attachment" do
@@ -50,19 +60,31 @@ describe FileClip do
 
     context "#update_from_filepicker!" do
 
-      context "delayed" do
+      context "without resque" do
         before :each do
           image.filepicker_url = filepicker_url
           image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
         end
 
         context "image" do
-          it "should enqueue image with proper id and klass" do
-            image.should_receive(:update_from_filepicker?).and_return true
+          it "should process image" do
+            image.should_receive(:process_from_filepicker)
             image.update_from_filepicker!
           end
         end
+      end
 
+      context "with resque" do
+        before :each do
+          image.filepicker_url = filepicker_url
+          image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
+        end
+
+        it "enqueues job" do
+          stub_const "Resque", Class.new
+          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, Image, nil)
+          image.update_from_filepicker!
+        end
       end
     end
 

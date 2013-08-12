@@ -3,9 +3,22 @@ require 'fileclip/action_view/helpers'
 require 'fileclip/validators'
 require 'fileclip/engine'
 require 'fileclip/railtie'
+require 'fileclip/jobs/resque'
 require 'rest-client'
 
 module FileClip
+
+  class << self
+
+    def resque_enabled?
+      !!(defined? Resque)
+    end
+
+    def process(klass, instance_id)
+      klass.constantize.find(instance_id).process_from_filepicker
+    end
+
+  end
 
   module Glue
     def self.included(base)
@@ -45,7 +58,13 @@ module FileClip
     end
 
     def update_from_filepicker!
-      process_from_filepicker if update_from_filepicker?
+      if update_from_filepicker?
+        if FileClip.resque_enabled?
+          Resque.enqueue(FileClip::Jobs::Resque, self.class, self.id)
+        else
+          process_from_filepicker
+        end
+      end
     end
 
     def process_from_filepicker
