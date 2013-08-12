@@ -22,15 +22,14 @@ module FileClip
 
   module Glue
     def self.included(base)
-      base.extend(ClassMethods)
+      base.extend ClassMethods
+      base.extend FileClip::Validators::HelperMethods
       base.send :include, InstanceMethods
     end
   end
 
   module ClassMethods
     def fileclip(name)
-      extend FileClip::Validators::HelperMethods
-
       attr_accessible :filepicker_url
       after_commit  :update_from_filepicker!
 
