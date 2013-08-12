@@ -19,26 +19,25 @@ module FileClip
       extend FileClip::Validators::HelperMethods
 
       attr_accessible :filepicker_url
-
       after_commit  :update_from_filepicker!
+
+      set_fileclipped(name)
     end
 
-    def paperclip_definitions
-      @paperclip_definitions ||= if Paperclip::VERSION.to_f < 3.5
-        attachment_definitions
-      elsif Paperclip::VERSION == "3.5.0"
-        Paperclip::Tasks::Attachments.definitions_for(self)
-      else
-        Paperclip::AttachmentRegistry.definitions_for(self)
-      end
+    def fileclipped
+      @attachment_name
+    end
+
+    def set_fileclipped(name)
+      @attachment_name = name
     end
   end
 
   module InstanceMethods
 
-    # TODO: can't handle multiples, just first
+    # TODO: can't handle multiples, just given
     def attachment_name
-      @attachment_name ||= self.class.paperclip_definitions.keys.first
+      @attachment_name ||= self.class.fileclipped
     end
 
     def attachment_object

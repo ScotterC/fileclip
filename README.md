@@ -78,7 +78,7 @@ This paperclip validation will return errors even if filepicker url is present:
   validates :attachment, :attachment_presence => true
 ````
 
-However, these will work fine:
+However, this will work fine.  It'll skip the attachment check if a filepicker url is present and validate if it's not.
 ````
   validates_attachment :attachment, :size => { :in => 0..1000 }, :presence => true
 ````

@@ -5,8 +5,8 @@ describe FileClip do
   let(:image) { Image.new }
   let(:uri) { URI.parse(filepicker_url) }
 
-  describe "glue" do
-    describe "add_callbacks" do
+  describe "class_methods" do
+    describe "fileclip" do
       it "should register callback when called" do
         Image.fileclip :attachment
         Image._commit_callbacks.first.filter.should == :update_from_filepicker!
@@ -18,6 +18,13 @@ describe FileClip do
         Image.stub(:respond_to?).with(:after_commit).and_return false
         FileClip::Glue.included(Image)
         Image._save_callbacks.first.filter.should == :update_from_filepicker!
+      end
+
+      it "adds name to fileclipped" do
+        Image.fileclipped.should == :attachment
+        Image.fileclip(:image)
+        Image.fileclipped.should == :image
+        Image.fileclip(:attachment) # set it back for other tests
       end
     end
   end
