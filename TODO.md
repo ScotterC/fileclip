@@ -4,6 +4,7 @@ Backend:
 * handle multiple attachments on a model, prefix column with attachment name
 * create generator for migration
 * create generator for intializer
+* Normalize filenames
 
 Frontend:
 * Allow overriding of filepicker options
