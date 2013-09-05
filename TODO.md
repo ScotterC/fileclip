@@ -5,6 +5,7 @@ Backend:
 * create generator for migration
 * create generator for intializer
 * Normalize filenames
+* Change keys as an option.  defaults to filepicker_url
 
 Frontend:
 * Allow overriding of filepicker options
