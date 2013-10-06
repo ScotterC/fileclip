@@ -10,10 +10,18 @@ module FileClip
       # Options
       # js to activate it on the spot, defaults to true
       # class to add css classes
-      def link_to_fileclip(text, form_object, options={})
+      def link_to_fileclip(text, form_object, options={}, &block)
+        form_object, options = text, form_object if block_given?
+
         id = fileclip_id(form_object)
         classes = fileclip_css_classes(options[:class])
-        link = link_to text, "javascript:void(0)", class: classes, id: id
+
+        # Got to be a cleaner way to do this
+        link = if block_given?
+          link_to "javascript:void(0)", class: classes, id: id, &block
+        else
+          link_to text, "javascript:void(0)", class: classes, id: id
+        end
 
         fileclip_link_builder(link, form_object, options, id)
       end
@@ -50,9 +58,10 @@ module FileClip
 
         js = activation(options[:js], id)
 
-        js + link + form_object.hidden_field(:filepicker_url,
-                                              class: "js-fileclip_url",
-                                              data: { type: attachment_name})
+        js + link +
+        form_object.hidden_field(:filepicker_url,
+                                  class: "js-fileclip_url",
+                                  data: { type: attachment_name })
       end
 
     end

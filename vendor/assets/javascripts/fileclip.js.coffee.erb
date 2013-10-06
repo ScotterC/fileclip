@@ -38,12 +38,18 @@ class window.FileClip
   # or clicked button's next input
   imageHandler: (fpfile, callback, target) ->
     file = fpfile[0]
-    if not @_clicked_button
-      $(target).find(".js-fileclip_url").val file.url
+
+    $file_target = if not @_clicked_button
+      $(target).find(".js-fileclip_url")
     else if @_clicked_button.data("id")
-      $("##{@_clicked_button.data("id")}").next(".js-fileclip_url").val file.url
+      $("##{@_clicked_button.data("id")}").next(".js-fileclip_url")
     else
-      @_clicked_button.next(".js-fileclip_url").val file.url
+      @_clicked_button.next(".js-fileclip_url")
+
+    if $file_target.length > 0
+      $file_target.val file.url
+    else
+      console.log "File Failed to Save"
 
     callback(file, @_clicked_button) if callback
 
