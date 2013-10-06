@@ -5,8 +5,6 @@ Bundler.setup
 # Prepare activerecord
 # require "active_record"
 require 'rails/all'
-require 'byebug'
-
 
 # Connect to sqlite
 ActiveRecord::Base.establish_connection(
