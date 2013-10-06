@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    fileclip (0.1.0)
+    fileclip (0.2.0)
       paperclip
       paperclip (>= 3.5.1)
       railties (>= 3.0)
