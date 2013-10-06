@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = "2.0.3"
   s.summary = "A FilePicker / PaperClip mashup."
 
-  s.add_dependency 'paperclip', [">= 3.3.0"]
+  s.add_dependency 'paperclip', [">= 3.5.1"]
   s.add_dependency 'rest-client'
 
   s.add_development_dependency "rspec"

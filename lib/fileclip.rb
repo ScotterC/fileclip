@@ -8,6 +8,17 @@ require 'rest-client'
 
 module FileClip
 
+  mattr_accessor :change_keys
+
+  def self.change_keys
+    @@change_keys ||= [:filepicker_url]
+  end
+
+  def self.delayed?
+    defined?(DelayedPaperclip)
+    # TODO: replace with checking for delayed options?
+  end
+
   class << self
 
     def resque_enabled?
@@ -59,18 +70,26 @@ module FileClip
     def update_from_filepicker!
       if update_from_filepicker?
         if FileClip.resque_enabled?
-          Resque.enqueue(FileClip::Jobs::Resque, self.class, self.id)
+          # TODO: self.class.name is webrick ???
+          delay_process!
         else
           process_from_filepicker
         end
       end
     end
 
+    def delay_process!
+      update_column(:"#{attachment_name}_processing", true) if FileClip.delayed?
+      Resque.enqueue(FileClip::Jobs::Resque, self.class.name, self.id)
+    end
+
     def process_from_filepicker
       self.class.skip_callback :commit, :after, :update_from_filepicker!
       self.send(:"#{attachment_name}=", URI.parse(filepicker_url))
       self.set_metadata
+      self.attachment_object.save_with_prepare_enqueueing if FileClip.delayed?
       self.save
+      self.enqueue_delayed_processing if FileClip.delayed?
       self.class.set_callback :commit, :after, :update_from_filepicker!
     end
 
@@ -83,7 +102,7 @@ module FileClip
     end
 
     def update_from_filepicker?
-      filepicker_url_previously_changed? &&
+      fileclip_previously_changed? &&
       filepicker_url.present? &&
       !filepicker_only?
     end
@@ -92,8 +111,8 @@ module FileClip
       !filepicker_url.present?
     end
 
-    def filepicker_url_previously_changed?
-      previous_changes.keys.include?('filepicker_url')
+    def fileclip_previously_changed?
+      !(previous_changes.keys.map(&:to_sym) & FileClip.change_keys).empty?
     end
 
     # To be overridden in model if specific logic for not

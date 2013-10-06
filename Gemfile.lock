@@ -3,7 +3,7 @@ PATH
   specs:
     fileclip (0.1.0)
       paperclip
-      paperclip (>= 3.3.0)
+      paperclip (>= 3.5.1)
       railties (>= 3.0)
       rest-client
 
@@ -39,15 +39,10 @@ GEM
       multi_json (~> 1.0)
     arel (3.0.2)
     builder (3.0.4)
-    byebug (1.6.1)
-      columnize (~> 0.3.6)
-      debugger-linecache (~> 1.2.0)
     climate_control (0.0.3)
       activesupport (>= 3.0)
     cocaine (0.5.1)
       climate_control (>= 0.0.3, < 1.0)
-    columnize (0.3.6)
-    debugger-linecache (1.2.0)
     diff-lcs (1.2.4)
     erubis (2.7.0)
     hike (1.2.3)
@@ -60,7 +55,7 @@ GEM
     mime-types (1.23)
     mono_logger (1.1.0)
     multi_json (1.7.7)
-    paperclip (3.5.0)
+    paperclip (3.5.1)
       activemodel (>= 3.0.0)
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.0)
@@ -135,7 +130,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  byebug
   fileclip!
   rails (= 3.2.14)
   resque

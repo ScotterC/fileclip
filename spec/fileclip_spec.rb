@@ -5,6 +5,28 @@ describe FileClip do
   let(:image) { Image.new }
   let(:uri) { URI.parse(filepicker_url) }
 
+  describe "change keys" do
+    it "defaults to just fileclip_url" do
+      FileClip.change_keys.should == [:filepicker_url]
+    end
+
+    it "can be added to" do
+      FileClip.change_keys << :file_name
+      FileClip.change_keys.should == [:filepicker_url, :file_name]
+    end
+  end
+
+  describe ".delayed?" do
+    it "returns false without delayed paperclip" do
+      FileClip.delayed?.should be_false
+    end
+
+    it "returns true if delayed paperclip exists" do
+      stub_const("DelayedPaperclip", true)
+      FileClip.delayed?.should be_true
+    end
+  end
+
   describe "class_methods" do
     describe "fileclip" do
       it "should register callback when called" do
@@ -82,7 +104,7 @@ describe FileClip do
 
         it "enqueues job" do
           stub_const "Resque", Class.new
-          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, Image, nil)
+          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, "Image", nil)
           image.update_from_filepicker!
         end
       end
@@ -138,16 +160,15 @@ describe FileClip do
       end
     end
 
-
-    context "#filepicker_url_previously_changed?" do
+    context "#fileclip_previously_changed?" do
       it "should return true with previous changed filepicker_url" do
         image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
-        image.filepicker_url_previously_changed?.should be_true
+        image.fileclip_previously_changed?.should be_true
       end
 
       it "should return false without previously changed filepicker_url" do
         image.stub_chain(:previous_changes, :keys).and_return []
-        image.filepicker_url_previously_changed?.should be_false
+        image.fileclip_previously_changed?.should be_false
       end
     end
 
