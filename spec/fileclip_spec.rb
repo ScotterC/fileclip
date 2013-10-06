@@ -22,7 +22,7 @@ describe FileClip do
     end
 
     it "returns true if delayed paperclip exists" do
-      module DelayedPaperclip; end
+      stub_const("DelayedPaperclip", true)
       FileClip.delayed?.should be_true
     end
   end
