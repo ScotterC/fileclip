@@ -1,36 +1,21 @@
 $:.push File.expand_path("../lib", __FILE__)
 require "fileclip/version"
-require 'date'
 
 Gem::Specification.new do |s|
-  s.name = "fileclip"
-  s.version = FileClip::VERSION
+  s.name          = "fileclip"
+  s.version       = FileClip::VERSION
+  s.platform      = Gem::Platform::RUBY
+  s.authors       = ["Scott Carleton"]
+  s.summary       = "A FilePicker / PaperClip mashup."
+  s.description   = "A FilePicker / PaperClip mashup.  Use Filepicker for uploads and paperclip to process them."
+  s.email         = "scott@artsicle.com"
+  s.license       = "MIT"
+  s.files         = `git ls-files`.split("\n")
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.homepage      = "http://github.com/ScotterC/fileclip"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Scott Carleton"]
-  s.date = Date.today.to_s
-  s.description = "A FilePicker / PaperClip mashup.  Use Filepicker for uploads and paperclip to process them."
-  s.email = "scott@artsicle.com"
-  s.extra_rdoc_files = [
-    "LICENSE",
-    "README.md"
-  ]
-  s.files = [
-    ".document",
-    "Gemfile",
-    "Gemfile.lock",
-    "LICENSE",
-    "README.md",
-    "Rakefile",
-    "fileclip.gemspec",
-    "lib/fileclip.rb",
-    "lib/fileclip/version.rb"
-  ]
-  s.homepage = "http://github.com/ScotterC/fileclip"
-  s.licenses = ["MIT"]
-  s.require_paths = ["lib"]
   s.rubygems_version = "2.0.3"
-  s.summary = "A FilePicker / PaperClip mashup."
 
   s.add_dependency 'paperclip', [">= 3.5.1"]
   s.add_dependency 'rest-client'
