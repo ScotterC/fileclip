@@ -108,6 +108,26 @@ describe FileClip do
           image.update_from_filepicker!
         end
       end
+
+      context "with delayed paperclip" do
+        let(:delayed_image) { DelayedImage.create }
+
+        before :each do
+          FileClip.stub(:delayed?).and_return true
+          FileClip.stub(:resque_enabled?).and_return true
+          stub_const "Resque", Class.new
+
+          delayed_image.filepicker_url = filepicker_url
+          delayed_image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
+        end
+
+        it "should update processing column" do
+          delayed_image.attachment_processing.should be_false
+          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, "DelayedImage", delayed_image.id)
+          delayed_image.update_from_filepicker!
+          delayed_image.attachment_processing.should be_true
+        end
+      end
     end
 
     context "#update_from_filepicker?" do

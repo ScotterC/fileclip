@@ -81,7 +81,7 @@ module FileClip
 
     def delay_process!
       update_column(:"#{attachment_name}_processing", true) if FileClip.delayed?
-      Resque.enqueue(FileClip::Jobs::Resque, self.class.name, self.id)
+      ::Resque.enqueue(FileClip::Jobs::Resque, self.class.name, self.id)
     end
 
     def process_from_filepicker

@@ -33,6 +33,22 @@ class Image < ActiveRecord::Base
 
 end
 
+class DelayedImage < ActiveRecord::Base
+
+  has_attached_file :attachment,
+    :storage => :filesystem,
+    :path => "./spec/tmp/:style/:id.:extension",
+    :url => "./spec/tmp/:style/:id.extension"
+
+  # Not testing DelayedPaperclip directly yet
+  # process_in_background :attachment,
+  #                       if: :filepicker_url_not_present?
+
+  fileclip :attachment
+
+end
+
+
 class Asset < ActiveRecord::Base
 
   has_attached_file :attachment,
