@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Scott Carleton"]
+  s.date = Date.today.to_s
   s.description = "A FilePicker / PaperClip mashup.  Use Filepicker for uploads and paperclip to process them."
   s.email = "scott@artsicle.com"
   s.extra_rdoc_files = [
