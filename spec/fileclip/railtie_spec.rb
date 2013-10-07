@@ -6,7 +6,6 @@ describe FileClip::Railtie do
       ActiveRecord::Base.should_receive(:send).with(:include, FileClip::Glue)
       ActionView::Base.should_receive(:send).with(:include, FileClip::ActionView::Helpers)
       FileClip::Railtie.run_initializers
-      FileClip::Railtie.insert
     end
   end
 end

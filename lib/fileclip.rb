@@ -7,26 +7,25 @@ require 'fileclip/jobs/resque'
 require 'rest-client'
 
 module FileClip
-
   mattr_accessor :change_keys
 
-  def self.change_keys
-    @@change_keys ||= [:filepicker_url]
-  end
-
-  def self.delayed?
-    defined?(DelayedPaperclip)
-    # TODO: replace with checking for delayed options?
-  end
-
   class << self
+
+    def process(klass, instance_id)
+      klass.constantize.find(instance_id).process_from_filepicker
+    end
+
+    # TODO: replace with checking for delayed options?
+    def delayed?
+      defined?(DelayedPaperclip)
+    end
 
     def resque_enabled?
       !!(defined? Resque)
     end
 
-    def process(klass, instance_id)
-      klass.constantize.find(instance_id).process_from_filepicker
+    def change_keys
+      @@change_keys ||= [:filepicker_url]
     end
 
   end
@@ -123,5 +122,3 @@ module FileClip
   end
 
 end
-
-FileClip::Railtie.insert
