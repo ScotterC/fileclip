@@ -18,14 +18,14 @@ class window.FileClip
 
   picker: (callback) =>
     filepicker.pickAndStore
-      mimetypes: "image/*"
+      mimetypes: "<%= FileClip.configuration.mime_types %>"
       container: "modal"
-      service: "COMPUTER"
-      maxSize: (20 * 1024 * 1024)
+      services: <%= FileClip.configuration.services %>
+      maxSize: (<%= FileClip.configuration.max_size %> * 1024 * 1024)
     ,
       location: "S3"
-      path: "/fileclip/"
-      access: 'public'
+      path: "<%= FileClip.configuration.storage_path %>"
+      access: "<%= FileClip.configuration.file_access %>"
     , (fpfile) =>
       @imageHandler fpfile, callback
     , (error) =>

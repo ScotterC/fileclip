@@ -28,6 +28,11 @@ end
 # config/initializers/fileclip.rb
 FileClip.configure do |config|
   config.filepicker_key = 'XXXXXXXXXXXXXXXXXXX'
+  config.services = ["COMPUTER", "DROPBOX"] # Defaults to ["COMPUTER"]
+  config.max_size = 20 # Megabytes, defaults to 20
+  config.storage_path = "/assets/" # Defaults to "/fileclip/"
+  config.mime_types = "images/jpeg" # Defaults to "images/*"
+  config.file_access = "private" # Defaults to "public"
 end
 ````
 
@@ -59,13 +64,8 @@ end
 ````
 
 #### Current FilePicker options hardcoded
-* mimetypes are image/*
 * container modal
-* service Computer
-* maxsize is 20 mb
 * location is S3
-* path is "/fileclip"
-* access is public
 
 Features:
 * Unobtrusive.  Normal paperclip uploads still work
