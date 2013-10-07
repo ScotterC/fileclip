@@ -8,3 +8,12 @@ ActiveRecord::Schema.define :version => 0 do
     t.string  :filepicker_url
   end
 end
+
+ActiveRecord::Schema.define :version => 0 do
+  create_table "assets", :force => true do |t|
+    t.string  :attachment_file_name
+    t.string  :attachment_content_type
+    t.integer :attachment_updated_at
+    t.integer :attachment_file_size
+  end
+end

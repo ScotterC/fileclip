@@ -6,6 +6,8 @@ require 'fileclip/railtie'
 require 'fileclip/jobs/resque'
 require 'rest-client'
 
+# TODO: make fileclip methods only load on fileclipped models
+
 module FileClip
   mattr_accessor :change_keys
 
@@ -107,6 +109,7 @@ module FileClip
     end
 
     def filepicker_url_not_present?
+      return true unless self.class.column_names.include? "filepicker_url"
       !filepicker_url.present?
     end
 

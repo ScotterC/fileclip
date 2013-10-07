@@ -32,3 +32,12 @@ class Image < ActiveRecord::Base
   fileclip :attachment
 
 end
+
+class Asset < ActiveRecord::Base
+
+  has_attached_file :attachment,
+    :storage => :filesystem,
+    :path => "./spec/tmp/:style/:id.:extension",
+    :url => "./spec/tmp/:style/:id.extension"
+
+end
