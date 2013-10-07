@@ -123,3 +123,5 @@ module FileClip
   end
 
 end
+
+FileClip::Railtie.insert
