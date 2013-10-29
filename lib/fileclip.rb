@@ -98,7 +98,11 @@ module FileClip
       metadata = JSON.parse(::RestClient.get filepicker_url + "/metadata")
 
       self.send(:"#{attachment_name}_content_type=",  metadata["mimetype"])
-      self.send(:"#{attachment_name}_file_name=",     metadata["filename"])
+
+      # Delegate to paperclips filename cleaner
+      filename = self.attachment_object.send(:cleanup_filename, metadata["filename"])
+      self.send(:"#{attachment_name}_file_name=",     filename)
+
       self.send(:"#{attachment_name}_file_size=",     metadata["size"])
     end
 
