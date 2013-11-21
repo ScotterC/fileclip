@@ -2,6 +2,9 @@ require 'rubygems' unless defined? Gem
 require 'bundler'
 Bundler.setup
 
+require 'coveralls'
+Coveralls.wear!
+
 # Prepare activerecord
 # require "active_record"
 require 'rails/all'
