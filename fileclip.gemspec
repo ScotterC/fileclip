@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency "rails"
   s.add_development_dependency 'resque'
+  s.add_development_dependency 'coveralls'
   s.add_runtime_dependency(%q<railties>, [">= 3.0"])
 
   s.add_runtime_dependency "paperclip"
