@@ -1,4 +1,4 @@
-FileClip [![Build Status](https://travis-ci.org/ScotterC/fileclip.png?branch=master)](https://travis-ci.org/ScotterC/fileclip)
+FileClip [![Build Status](https://travis-ci.org/ScotterC/fileclip.png?branch=master)](https://travis-ci.org/ScotterC/fileclip) [![Coverage Status](https://coveralls.io/repos/ScotterC/fileclip/badge.png?branch=master)](https://coveralls.io/r/ScotterC/fileclip?branch=master)
 ========
 
 A FilePicker / PaperClip mashup.  Use Filepicker for uploads and paperclip to process them.
