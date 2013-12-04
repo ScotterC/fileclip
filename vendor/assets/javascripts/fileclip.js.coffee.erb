@@ -1,7 +1,15 @@
 class window.FileClip
   _clicked_button: ""
 
+  @env = ->
+    "<%= Rails.env %>"
+
   constructor: ->
+    excludedEnvs = <%= FileClip.configuration.excluded_environments %>
+    if @inArray(excludedEnvs, FileClip.env()) != -1
+      return false
+
+    @loadFilepicker()
     filepicker.setKey('<%= FileClip.configuration.filepicker_key %>');
 
   # For filepicker_helper
@@ -53,5 +61,35 @@ class window.FileClip
 
     callback(file, @_clicked_button) if callback
 
+  loadFilepicker: ->
+    ((a) ->
+      return if window.filepicker
+      b = a.createElement("script")
+      b.type = "text/javascript"
+      b.async = not 0
+      b.src = ((if "https:" is a.location.protocol then "https:" else "http:")) + "//api.filepicker.io/v1/filepicker.js"
+      c = a.getElementsByTagName("script")[0]
+      c.parentNode.insertBefore b, c
+      d = {}
+      d._queue = []
+      e = "pick,pickMultiple,pickAndStore,read,write,writeUrl,export,convert,store,storeUrl,remove,stat,setKey,constructWidget,makeDropPane".split(",")
+      f = (a, b) ->
+        ->
+          b.push [a, arguments]
 
+      g = 0
 
+      while g < e.length
+        d[e[g]] = f(e[g], d._queue)
+        g++
+      window.filepicker = d
+    ) document
+
+  inArray: (array, value) ->
+    return array.indexOf(value) if array.indexOf
+    i = 0
+
+    while i < array.length
+      return i  if array[i] is value
+      i++
+    -1

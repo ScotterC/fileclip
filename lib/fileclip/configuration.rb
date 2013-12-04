@@ -2,7 +2,8 @@ module FileClip
   class Configuration
     attr_writer :filepicker_key, :services,
                 :max_size, :storage_path,
-                :mime_types, :file_access
+                :mime_types, :file_access,
+                :excluded_environments
 
     def filepicker_key
       @filepicker_key or raise "Set Filepicker api_key"
@@ -26,6 +27,10 @@ module FileClip
 
     def file_access
       @file_access or "public"
+    end
+
+    def excluded_environments
+      @excluded_environments or ["test"]
     end
 
   end

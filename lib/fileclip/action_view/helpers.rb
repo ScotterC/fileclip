@@ -4,7 +4,7 @@ module FileClip
 
       # Include relevant JS
       def fileclip_js_include_tag
-        javascript_include_tag "//api.filepicker.io/v1/filepicker.js", "fileclip"
+        javascript_include_tag "fileclip"
       end
 
       # Options

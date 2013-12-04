@@ -33,6 +33,7 @@ FileClip.configure do |config|
   config.storage_path = "/assets/" # Defaults to "/fileclip/"
   config.mime_types = "images/jpeg" # Defaults to "images/*"
   config.file_access = "private" # Defaults to "public"
+  config.excluded_environments = [] # Defaults to ["test"]
 end
 ````
 
