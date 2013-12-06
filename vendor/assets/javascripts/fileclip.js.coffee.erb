@@ -30,6 +30,7 @@ class window.FileClip
       container: "modal"
       services: <%= FileClip.configuration.services %>
       maxSize: (<%= FileClip.configuration.max_size %> * 1024 * 1024)
+      openTo: "<%= FileClip.configuration.default_service %>"
     ,
       location: "S3"
       path: "<%= FileClip.configuration.storage_path %>"

@@ -28,12 +28,13 @@ end
 # config/initializers/fileclip.rb
 FileClip.configure do |config|
   config.filepicker_key = 'XXXXXXXXXXXXXXXXXXX'
-  config.services = ["COMPUTER", "DROPBOX"] # Defaults to ["COMPUTER"]
-  config.max_size = 20 # Megabytes, defaults to 20
-  config.storage_path = "/assets/" # Defaults to "/fileclip/"
-  config.mime_types = "images/jpeg" # Defaults to "images/*"
-  config.file_access = "private" # Defaults to "public"
-  config.excluded_environments = [] # Defaults to ["test"]
+  config.services = ["COMPUTER", "DROPBOX"]     # Defaults to ["COMPUTER"]
+  config.max_size = 20                          # Megabytes, defaults to 20
+  config.storage_path = "/assets/"              # Defaults to "/fileclip/"
+  config.mime_types = "images/jpeg"             # Defaults to "images/*"
+  config.file_access = "private"                # Defaults to "public"
+  config.excluded_environments = []             # Defaults to ["test"]
+  config.default_service = "DROPBOX"            # Defaults to "COMPUTER"
 end
 ````
 

@@ -3,7 +3,7 @@ module FileClip
     attr_writer :filepicker_key, :services,
                 :max_size, :storage_path,
                 :mime_types, :file_access,
-                :excluded_environments
+                :excluded_environments, :default_service
 
     def filepicker_key
       @filepicker_key or raise "Set Filepicker api_key"
@@ -31,6 +31,10 @@ module FileClip
 
     def excluded_environments
       @excluded_environments or ["test"]
+    end
+
+    def default_service
+      @default_service or "COMPUTER"
     end
 
   end
