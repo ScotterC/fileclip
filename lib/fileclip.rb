@@ -4,6 +4,7 @@ require 'fileclip/validators'
 require 'fileclip/engine'
 require 'fileclip/railtie'
 require 'fileclip/jobs/resque'
+require 'fileclip/jobs/sidekiq'
 require 'rest-client'
 
 # TODO: make fileclip methods only load on fileclipped models
@@ -24,6 +25,10 @@ module FileClip
 
     def resque_enabled?
       !!(defined? Resque)
+    end
+
+    def sidekiq_enabled?
+      !!(defined? Sidekiq)
     end
 
     def change_keys
@@ -72,16 +77,23 @@ module FileClip
       if update_from_filepicker?
         if FileClip.resque_enabled?
           # TODO: self.class.name is webrick ???
-          delay_process!
+          process_with_resque!
+        elsif FileClip.sidekiq_enabled?
+          process_with_sidekiq!
         else
           process_from_filepicker
         end
       end
     end
 
-    def delay_process!
+    def process_with_resque!
       update_column(:"#{attachment_name}_processing", true) if FileClip.delayed?
       ::Resque.enqueue(FileClip::Jobs::Resque, self.class.name, self.id)
+    end
+
+    def process_with_sidekiq!
+      update_column(:"#{attachment_name}_processing", true) if FileClip.delayed?
+      FileClip::Jobs::Sidekiq.perform_async(self.class.name, self.id)
     end
 
     def process_from_filepicker

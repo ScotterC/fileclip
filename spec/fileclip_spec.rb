@@ -60,6 +60,17 @@ describe FileClip do
         FileClip.resque_enabled?.should be_true
       end
     end
+
+    describe "sidekiq_enabled?" do
+      it "returns false by default" do
+        FileClip.sidekiq_enabled?.should be_false
+      end
+
+      it "returns true if resque exists" do
+        stub_const "Sidekiq", Class.new
+        FileClip.sidekiq_enabled?.should be_true
+      end
+    end
   end
 
   describe "instance methods" do
@@ -82,7 +93,7 @@ describe FileClip do
 
     context "#update_from_filepicker!" do
 
-      context "without resque" do
+      context "without a background queue" do
         before :each do
           image.filepicker_url = filepicker_url
           image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
@@ -96,15 +107,22 @@ describe FileClip do
         end
       end
 
-      context "with resque" do
+      context "with a background queue" do
         before :each do
           image.filepicker_url = filepicker_url
           image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
         end
 
-        it "enqueues job" do
+        it "enqueues job with Resque" do
           stub_const "Resque", Class.new
           Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, "Image", nil)
+          image.update_from_filepicker!
+        end
+
+        it "enqueues job with Sidekiq" do
+          stub_const "Sidekiq", Class.new
+          stub_const "Sidekiq::Worker", Class.new
+          FileClip::Jobs::Sidekiq.should_receive(:perform_async).with("Image", nil)
           image.update_from_filepicker!
         end
       end
