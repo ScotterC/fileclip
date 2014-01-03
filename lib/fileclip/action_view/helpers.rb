@@ -46,7 +46,7 @@ module FileClip
         return javascript_tag unless js.nil? || js
 
         javascript_tag("(function() {
-                          (new FileClip).button('##{id}', #{callback || 'undefined'});
+                          (new FileClip).button('##{id}', #{callback || 'null'});
                         })();")
       end
 
