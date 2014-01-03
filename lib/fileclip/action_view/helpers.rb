@@ -42,11 +42,11 @@ module FileClip
       end
 
       # Return empty tag if it's nil or true
-      def activation(js, id)
+      def activation(js, id, callback)
         return javascript_tag unless js.nil? || js
 
         javascript_tag("(function() {
-                          (new FileClip).button('##{id}');
+                          (new FileClip).button('##{id}', #{callback || 'undefined'});
                         })();")
       end
 
@@ -56,7 +56,7 @@ module FileClip
         # Get attachment name
         attachment_name = form_object.object.attachment_name
 
-        js = activation(options[:js], id)
+        js = activation(options[:js], id, options[:callback])
 
         js + link +
         form_object.hidden_field(:filepicker_url,
