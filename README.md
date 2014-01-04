@@ -63,6 +63,16 @@ end
   <%= f.submit %>
 <% end %>
 
+# Specify a callback function that gets called when Filepicker completes
+<%= link_to_fileclip "Choose a File", f, :callback => 'window.MyApp.filepickerCallback' %>
+
+# For more control you can disable automatic Javascript initialization.
+# You'll need to initialize the FileClip element yourself.
+<%= link_to_fileclip "Choose a File", f, :class => '.my-filepicker', :js => false %>
+
+# In your Javascript framework
+(new FileClip).button('.my-filepicker');
+
 ````
 
 #### Current FilePicker options hardcoded
