@@ -9,7 +9,7 @@ describe FileClip::Validators do
       Image._validators.clear
     end
 
-    describe "if no filepicker_url" do
+    describe "if no attachment_filepicker_url" do
       it "observes attachment presence" do
         Image.validates :attachment, :attachment_presence => true
         image.save.should be_false
@@ -31,8 +31,8 @@ describe FileClip::Validators do
 
     describe "with filepicker url" do
       before :each do
-        image.filepicker_url = "image.com"
-        image.filepicker_url_not_present?.should be_false
+        image.attachment_filepicker_url = "image.com"
+        image.attachment_filepicker_url_not_present?.should be_false
       end
 
       it "observes attachment presence" do

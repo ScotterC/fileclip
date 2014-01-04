@@ -1,20 +1,10 @@
 require 'spec_helper'
 
 describe FileClip do
-  let(:filepicker_url) { "https://www.filepicker.io/api/file/ibOold9OQfqbmzgP6D3O" }
+  let(:attachment_filepicker_url) { "https://www.filepicker.io/api/file/ibOold9OQfqbmzgP6D3O" }
+  let(:other_attachment_filepicker_url) { "https://www.filepicker.io/api/file/ibOold9OQfqbmzgP6D31" }
   let(:image) { Image.new }
-  let(:uri) { URI.parse(filepicker_url) }
-
-  describe "change keys" do
-    it "defaults to just fileclip_url" do
-      FileClip.change_keys.should == [:filepicker_url]
-    end
-
-    it "can be added to" do
-      FileClip.change_keys << :file_name
-      FileClip.change_keys.should == [:filepicker_url, :file_name]
-    end
-  end
+  let(:uri) { URI.parse(attachment_filepicker_url) }
 
   describe ".delayed?" do
     it "returns false without delayed paperclip" do
@@ -31,22 +21,15 @@ describe FileClip do
     describe "fileclip" do
       it "should register callback when called" do
         Image.fileclip :attachment
-        Image._commit_callbacks.first.filter.should == :update_from_filepicker!
+        Image._commit_callbacks.map(&:filter).should =~ [:update_attachment_from_filepicker!, :update_other_attachment_from_filepicker!]
       end
 
       it "registers after save callback if commit is not available" do
         pending # Skipping either callback
-        Image._save_callbacks.first.filter.should_not == :update_from_filepicker!
+        Image._save_callbacks.first.filter.should_not == :update_attachment_from_filepicker!
         Image.stub(:respond_to?).with(:after_commit).and_return false
         FileClip::Glue.included(Image)
-        Image._save_callbacks.first.filter.should == :update_from_filepicker!
-      end
-
-      it "adds name to fileclipped" do
-        Image.fileclipped.should == :attachment
-        Image.fileclip(:image)
-        Image.fileclipped.should == :image
-        Image.fileclip(:attachment) # set it back for other tests
+        Image._save_callbacks.first.filter.should == :update_attachment_from_filepicker!
       end
     end
 
@@ -74,56 +57,69 @@ describe FileClip do
   end
 
   describe "instance methods" do
-    context "#attachment_name" do
-      context "image" do
-        it "should return :attachment" do
-          image.attachment_name.should == :attachment
-        end
-      end
-    end
-
-    context "#attachment_object" do
-      context "image" do
-        it "should receive attachment" do
-          image.should_receive(:attachment)
-          image.attachment_object
-        end
-      end
-    end
-
-    context "#update_from_filepicker!" do
-
+    context "#update_attachment_from_filepicker!" do
       context "without a background queue" do
-        before :each do
-          image.filepicker_url = filepicker_url
-          image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
+        it "processes one attachment when only one changes" do
+          image.attachment_filepicker_url = attachment_filepicker_url
+          image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url"]
+          image.should_receive(:process_attachment_from_filepicker)
+          image.should_not_receive(:process_other_attachment_from_filepicker)
+          
+          image.update_attachment_from_filepicker!
+          image.update_other_attachment_from_filepicker!
         end
 
-        context "image" do
-          it "should process image" do
-            image.should_receive(:process_from_filepicker)
-            image.update_from_filepicker!
-          end
+        it "processes multiple attachments when multiple change" do
+          image.attachment_filepicker_url = attachment_filepicker_url
+          image.other_attachment_filepicker_url = other_attachment_filepicker_url
+          image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url", "other_attachment_filepicker_url"]
+          image.should_receive(:process_attachment_from_filepicker)
+          image.should_receive(:process_other_attachment_from_filepicker)
+          
+          image.update_attachment_from_filepicker!
+          image.update_other_attachment_from_filepicker!
         end
       end
 
       context "with a background queue" do
-        before :each do
-          image.filepicker_url = filepicker_url
-          image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
+        it "enqueues job with Resque" do
+          image.attachment_filepicker_url = attachment_filepicker_url
+          image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url"]
+          stub_const "Resque", Class.new
+          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, "Image", nil, :attachment)
+          image.update_attachment_from_filepicker!
         end
 
-        it "enqueues job with Resque" do
+        it "enqueues multiple job with Resque" do
+          image.attachment_filepicker_url = attachment_filepicker_url
+          image.other_attachment_filepicker_url = other_attachment_filepicker_url
+          image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url", "other_attachment_filepicker_url"]
           stub_const "Resque", Class.new
-          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, "Image", nil)
-          image.update_from_filepicker!
+          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, "Image", nil, :attachment)
+          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, "Image", nil, :other_attachment)
+          image.update_attachment_from_filepicker!
+          image.update_other_attachment_from_filepicker!
         end
 
         it "enqueues job with Sidekiq" do
+          image.attachment_filepicker_url = attachment_filepicker_url
+          image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url"]
           stub_const "Sidekiq", Class.new
           stub_const "Sidekiq::Worker", Class.new
-          FileClip::Jobs::Sidekiq.should_receive(:perform_async).with("Image", nil)
-          image.update_from_filepicker!
+          FileClip::Jobs::Sidekiq.should_receive(:perform_async).with("Image", nil, :attachment)
+          image.update_attachment_from_filepicker!
+        end
+
+        it "enqueues multiple job with Sidekiq" do
+          image.attachment_filepicker_url = attachment_filepicker_url
+          image.other_attachment_filepicker_url = other_attachment_filepicker_url
+          image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url", "other_attachment_filepicker_url"]
+          stub_const "Sidekiq", Class.new
+          stub_const "Sidekiq::Worker", Class.new
+          FileClip::Jobs::Sidekiq.should_receive(:perform_async).with("Image", nil, :attachment)
+          FileClip::Jobs::Sidekiq.should_receive(:perform_async).with("Image", nil, :other_attachment)
+          image.update_attachment_from_filepicker!
+          image.update_other_attachment_from_filepicker!
         end
       end
 
@@ -135,78 +131,78 @@ describe FileClip do
           FileClip.stub(:resque_enabled?).and_return true
           stub_const "Resque", Class.new
 
-          delayed_image.filepicker_url = filepicker_url
-          delayed_image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
+          delayed_image.attachment_filepicker_url = attachment_filepicker_url
+          delayed_image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url"]
         end
 
         it "should update processing column" do
           delayed_image.attachment_processing.should be_false
-          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, "DelayedImage", delayed_image.id)
-          delayed_image.update_from_filepicker!
+          Resque.should_receive(:enqueue).with(FileClip::Jobs::Resque, "DelayedImage", delayed_image.id, :attachment)
+          delayed_image.update_attachment_from_filepicker!
           delayed_image.attachment_processing.should be_true
         end
       end
     end
 
-    context "#update_from_filepicker?" do
-      it "should be false with only a filepicker url" do
-        image.filepicker_url = filepicker_url
-        image.update_from_filepicker?.should be_false
+    context "#update_attachment_from_filepicker?" do
+      it "should be false with only a attachment_filepicker url" do
+        image.attachment_filepicker_url = attachment_filepicker_url
+        image.update_attachment_from_filepicker?.should be_false
       end
 
       it "should be false without a filepicker" do
-        image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
-        image.update_from_filepicker?.should be_false
+        image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url"]
+        image.update_attachment_from_filepicker?.should be_false
       end
 
       it "should be true if filepicker url exists and is changed" do
-        image.filepicker_url = filepicker_url
-        image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
-        image.update_from_filepicker?.should be_true
+        image.attachment_filepicker_url = attachment_filepicker_url
+        image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url"]
+        image.update_attachment_from_filepicker?.should be_true
       end
     end
 
-    context "#process_from_filepicker" do
+    context "#process_attachment_from_filepicker" do
       context "not delayed" do
         context "image" do
           before :each do
-            image.filepicker_url = filepicker_url
+            image.attachment_filepicker_url = attachment_filepicker_url
           end
 
           it "should set attachment and save" do
             image.should_receive(:attachment=).with(uri)
             image.should_receive(:save)
-            image.process_from_filepicker
+            image.process_attachment_from_filepicker
           end
         end
       end
     end
 
-    context "#filepicker_url_not_present?" do
+    context "#attachment_filepicker_url_not_present?" do
       it "should return true" do
-        image.filepicker_url_not_present?.should == true
+        image.attachment_filepicker_url_not_present?.should == true
       end
 
       context "with filepicker url" do
         before :each do
-          image.filepicker_url = filepicker_url
+          image.attachment_filepicker_url = attachment_filepicker_url
         end
 
         it "should return false" do
-          image.filepicker_url_not_present?.should == false
+          image.attachment_filepicker_url_not_present?.should == false
         end
       end
     end
 
     context "#fileclip_previously_changed?" do
       it "should return true with previous changed filepicker_url" do
-        image.stub_chain(:previous_changes, :keys).and_return ["filepicker_url"]
-        image.fileclip_previously_changed?.should be_true
+        image.stub_chain(:previous_changes, :keys).and_return ["attachment_filepicker_url"]
+        image.attachment_fileclip_previously_changed?.should be_true
       end
 
-      it "should return false without previously changed filepicker_url" do
+      it "should return false without previously changed attachment_filepicker_url" do
         image.stub_chain(:previous_changes, :keys).and_return []
-        image.fileclip_previously_changed?.should be_false
+        image.attachment_fileclip_previously_changed?.should be_false
       end
     end
 
@@ -227,12 +223,12 @@ describe FileClip do
 
     context "assign metadata" do
       before :each do
-        image.filepicker_url = filepicker_url
-        RestClient.stub(:get).with(image.filepicker_url + "/metadata").and_return raw_data
+        image.attachment_filepicker_url = attachment_filepicker_url
+        RestClient.stub(:get).with(image.attachment_filepicker_url + "/metadata").and_return raw_data
       end
 
       it "sets metadata from filepicker" do
-        image.set_metadata
+        image.set_attachment_metadata
         image.attachment_content_type.should == "image/gif"
         image.attachment_file_name.should == "140x100.gif"
         image.attachment_file_size.should == 449
@@ -240,7 +236,7 @@ describe FileClip do
 
       context "process_from_filepicker" do
         it "sets data and uploads attachment" do
-          image.process_from_filepicker
+          image.process_attachment_from_filepicker
           image.attachment_content_type.should == "image/gif"
           image.attachment_file_name.should == "140x100.gif"
           image.attachment_file_size.should == 449
