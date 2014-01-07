@@ -4,7 +4,9 @@ class window.FileClip
   @env = ->
     "<%= Rails.env %>"
 
-  constructor: ->
+  constructor: (pickerOptions) ->
+    @pickerOptions = pickerOptions || {}
+
     excludedEnvs = <%= FileClip.configuration.excluded_environments %>
     if @inArray(excludedEnvs, FileClip.env()) != -1
       return false
@@ -25,13 +27,16 @@ class window.FileClip
     @picker(callback)
 
   picker: (callback) =>
-    filepicker.pickAndStore
+    pickerOptions =
       mimetypes: "<%= FileClip.configuration.mime_types %>"
       container: "modal"
       services: <%= FileClip.configuration.services %>
       maxSize: (<%= FileClip.configuration.max_size %> * 1024 * 1024)
       openTo: "<%= FileClip.configuration.default_service %>"
-    ,
+
+    $.extend(pickerOptions, @pickerOptions)
+
+    filepicker.pickAndStore pickerOptions,
       location: "S3"
       path: "<%= FileClip.configuration.storage_path %>"
       access: "<%= FileClip.configuration.file_access %>"
