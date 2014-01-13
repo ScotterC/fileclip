@@ -47,7 +47,6 @@ module FileClip
 
   module ClassMethods
     def fileclip(name)
-      attr_accessible :filepicker_url
       after_commit  :update_from_filepicker!
 
       set_fileclipped(name)
