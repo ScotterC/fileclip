@@ -43,7 +43,8 @@ class window.FileClip
     , (fpfile) =>
       @imageHandler fpfile, callback
     , (error) =>
-      console.log error.code
+      if window.console and $.isFunction(window.console.log)
+        window.console.log error.code
 
   # Accepts a filepicker file and optional callback
   # Passes file and button clicked to a callback
@@ -63,7 +64,8 @@ class window.FileClip
     if $file_target.length > 0
       $file_target.val file.url
     else
-      console.log "File Failed to Save"
+      if window.console and $.isFunction(window.console.log)
+        window.console.log "File Failed to Save"
 
     callback(file, @_clicked_button) if callback
 
