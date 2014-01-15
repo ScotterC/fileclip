@@ -52,6 +52,7 @@ module FileClip
 
       # Options
       # Activate (defaults to true) to set own javascript
+      # TODO: add to options to add css classes
       def fileclip_link_builder(link, form_object, options, id)
         # Get attachment name
         attachment_name = form_object.object.attachment_name
