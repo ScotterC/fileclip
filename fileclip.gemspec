@@ -17,7 +17,6 @@ Gem::Specification.new do |s|
 
   s.rubygems_version = "2.0.3"
 
-  s.add_dependency 'paperclip', [">= 3.5.1"]
   s.add_dependency 'rest-client'
 
   s.add_development_dependency "rspec"
@@ -28,6 +27,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'coveralls'
   s.add_runtime_dependency(%q<railties>, [">= 3.0"])
 
-  s.add_runtime_dependency "paperclip"
+  s.add_runtime_dependency "paperclip", [">= 3.5.1"]
 end
 
