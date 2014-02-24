@@ -35,6 +35,17 @@ describe FileClip do
     end
   end
 
+  describe "change keys" do
+    it "defaults to just fileclip_url" do
+      FileClip.change_keys.should == ["attachment_filepicker_url", "other_attachment_filepicker_url"]
+    end
+
+    it "can be added to" do
+      FileClip.change_keys << "file_name"
+      FileClip.change_keys.should == ["attachment_filepicker_url", "other_attachment_filepicker_url", "file_name"]
+    end
+  end
+
   describe "class_methods" do
     describe "fileclip" do
       it "registers callback" do

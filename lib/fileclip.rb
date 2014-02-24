@@ -7,6 +7,7 @@ require 'fileclip/engine'
 require 'fileclip/railtie'
 
 module FileClip
+  mattr_accessor :change_keys
 
   class << self
     def process(klass, instance_id, attachment_name)
@@ -17,6 +18,10 @@ module FileClip
       !!(defined? Resque) ||
       !!(defined? Sidekiq)
     end
+
+    def change_keys
+      @@change_keys ||= []
+    end
   end
 
   module ClassMethods
@@ -24,6 +29,8 @@ module FileClip
       cattr_accessor :fileclips
       self.fileclips ||= []
       self.fileclips.push name
+      FileClip.change_keys ||= []
+      FileClip.change_keys << fileclip_url(name)
 
       after_commit :process_fileclips!
     end
@@ -33,6 +40,10 @@ module FileClip
       skip_callback :commit, :after, :process_fileclips!
       yield
       set_callback  :commit, :after, :process_fileclips!
+    end
+
+    def fileclip_url(attachment_name)
+      new.send(:fileclip_url, attachment_name)
     end
   end
 
@@ -65,7 +76,7 @@ module FileClip
     end
 
     def fileclip_previously_changed?(attachment_name)
-      !(previous_changes.keys & [fileclip_url(attachment_name)]).empty?
+      !(previous_changes.keys & FileClip.change_keys).empty?
     end
 
     def fileclip_url(attachment_name)
