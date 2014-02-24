@@ -2,11 +2,17 @@ require 'rubygems' unless defined? Gem
 require 'bundler'
 Bundler.setup
 
-require 'coveralls'
-Coveralls.wear!
+if ENV["TRAVIS"]
+  require 'coveralls'
+  Coveralls.wear!
+end
 
-# Prepare activerecord
-# require "active_record"
+begin
+  require 'byebug'
+rescue LoadError
+  # Byebug is not available, just ignore.
+end
+
 require 'rails/all'
 
 # Connect to sqlite
@@ -24,9 +30,9 @@ ActiveRecord::Base.send(:include, Paperclip::Glue)
 require 'fileclip'
 ActiveRecord::Base.send(:include, FileClip::Glue)
 
+::ActionView::Helpers::FormBuilder.send(:include, FileClip::ActionView::FormHelper)
 
 class Image < ActiveRecord::Base
-
   has_attached_file :attachment,
     :storage => :filesystem,
     :path => "./spec/tmp/:style/:id.:extension",
@@ -40,27 +46,10 @@ class Image < ActiveRecord::Base
                     :url => "./spec/tmp/:style/:id.extension"
 
   fileclip :other_attachment
-
-end
-
-class DelayedImage < ActiveRecord::Base
-
-  has_attached_file :attachment,
-    :storage => :filesystem,
-    :path => "./spec/tmp/:style/:id.:extension",
-    :url => "./spec/tmp/:style/:id.extension"
-
-  # Not testing DelayedPaperclip directly yet
-  # process_in_background :attachment,
-  #                       if: :filepicker_url_not_present?
-
-  fileclip :attachment
-
 end
 
 
-class Asset < ActiveRecord::Base
-
+class PlainAsset < ActiveRecord::Base
   has_attached_file :attachment,
     :storage => :filesystem,
     :path => "./spec/tmp/:style/:id.:extension",

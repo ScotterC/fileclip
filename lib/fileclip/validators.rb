@@ -1,16 +1,41 @@
 module FileClip
   module Validators
-
     module HelperMethods
-      %w{validates_attachment_content_type validates_attachment_presence validates_attachment_size}.each do |method|        
-        define_method(method) do |*attr_names|
-          if method_defined?("#{attr_names.first}_filepicker_url".to_sym)
-            attr_names.last.merge!({ :if => "#{attr_names.first}_filepicker_url_not_present?".to_sym })
-          end
-          super(*attr_names)
+      def skip_paperclip?(record, attribute)
+        record.class.respond_to?(:fileclips) &&
+        record.class.fileclips.include?(attribute) &&
+        record.fileclip_url_present?(attribute)
+      end
+    end
+
+    class AttachmentPresenceValidator < Paperclip::Validators::AttachmentPresenceValidator
+      include FileClip::Validators::HelperMethods
+
+      def validate_each(record, attribute, value)
+        unless skip_paperclip?(record, attribute)
+          super
         end
       end
+    end
 
+    class AttachmentContentTypeValidator < Paperclip::Validators::AttachmentContentTypeValidator
+      include FileClip::Validators::HelperMethods
+
+      def validate_each(record, attribute, value)
+        unless skip_paperclip?(record, attribute)
+          super
+        end
+      end
+    end
+
+    class AttachmentSizeValidator < Paperclip::Validators::AttachmentSizeValidator
+      include FileClip::Validators::HelperMethods
+
+      def validate_each(record, attribute, value)
+        unless skip_paperclip?(record, attribute)
+          super
+        end
+      end
     end
 
   end

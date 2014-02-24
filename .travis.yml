@@ -1,10 +1,11 @@
 language: ruby
 rvm:
-  - 2.0.0
-
-script:
-- bundle exec rspec spec
-
+  - 2.1.0
+script: "bundle exec rake spec"
 notifications:
   email:
     - scott@artsicle.com
+gemfile:
+  - gemfiles/rails3_2.gemfile
+  - gemfiles/rails4.gemfile
+  - gemfiles/paperclip3_5.gemfile
