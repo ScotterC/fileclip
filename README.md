@@ -19,73 +19,88 @@ processed by paperclip after the object is saved.
 ## Minimal Viable Setup
 
 ### Add to Paperclip table
-	# column prefix needs to be paperclip attachment name
-	class AddFileClipToImages < ActiveRecord::Migration
-	  def up
-	    add_column :images, :attachment_filepicker_url, :string
-      add_column :images, :attachment_processing, :boolean
-	  end
 
-	  def down
-	    remove_column :images, :attachment_filepicker_url
-      remove_column :images, :attachment_processing
-	  end
-	end
+````ruby
+# column prefix needs to be paperclip attachment name
+class AddFileClipToImages < ActiveRecord::Migration
+  def up
+    add_column :images, :attachment_filepicker_url, :string
+    add_column :images, :attachment_processing, :boolean
+  end
+
+  def down
+    remove_column :images, :attachment_filepicker_url
+    remove_column :images, :attachment_processing
+  end
+end
+````
 
 ### In Initializer
-	# config/initializers/fileclip.rb
-	# Defaults shown
-	FileClip.configure do |config|
-	  config.filepicker_key        = 'XXXXXXXXXXXXXXXXXXX'
-	  config.services              = ["COMPUTER"]
-	  config.max_size              = 20
-	  config.storage_path          = "/fileclip/"
-	  config.mime_types            = "images/*"
-	  config.file_access           = "public"
-	  config.excluded_environments = ["test"]
-	  config.default_service       = "COMPUTER"
-	end
+
+````ruby
+# config/initializers/fileclip.rb
+# Defaults shown
+FileClip.configure do |config|
+  config.filepicker_key        = 'XXXXXXXXXXXXXXXXXXX'
+  config.services              = ["COMPUTER"]
+  config.max_size              = 20
+  config.storage_path          = "/fileclip/"
+  config.mime_types            = "images/*"
+  config.file_access           = "public"
+  config.excluded_environments = ["test"]
+  config.default_service       = "COMPUTER"
+end
+````
 
 ### In Model
-	# models/image.rb
-	class Image << ActiveRecord::Base
-	  has_attached_file :attachment
 
-	  fileclip :attachment
-	end
+````ruby
+# models/image.rb
+class Image << ActiveRecord::Base
+  has_attached_file :attachment
+
+  fileclip :attachment
+end
+````
 
 ### In View
-	# Loads Filepicker js, and FileClip js
-	<%= fileclip_js_include_tag %>
 
-	 # provides a button that can be styled any way you choose
+````
+# Loads Filepicker js, and FileClip js
+<%= fileclip_js_include_tag %>
 
-	<%= form_for(Image.new) do |f| %>
+ # provides a button that can be styled any way you choose
 
-	  <%= f.fileclip :attachment, "Choose a File" %>
+<%= form_for(Image.new) do |f| %>
 
-	  <%= f.submit %>
-	<% end %>
+  <%= f.fileclip :attachment, "Choose a File" %>
 
-	# Specify a callback function that gets called when Filepicker completes
-	<%= f.fileclip :attachment, "Choose a File", :callback => 'window.MyApp.filepickerCallback' %>
+  <%= f.submit %>
+<% end %>
+
+# Specify a callback function that gets called when Filepicker completes
+<%= f.fileclip :attachment, "Choose a File", :callback => 'window.MyApp.filepickerCallback' %>
+````
 
 ### More Control
-	# For more control you can disable automatic JS initialization.
-	# You'll need to add event handlers to the button manually.
-	<%= f.fileclip :attachment, "Choose a File", :class => ".my-fileclip", :activate => false %>
 
-  # Javascript
+````
+# For more control you can disable automatic JS initialization.
+# You'll need to add event handlers to the button manually.
+<%= f.fileclip :attachment, "Choose a File", :class => ".my-fileclip", :activate => false %>
 
-  # Using FileClip's JS work
-  fileclip = new Fileclip(false)
-  fileclip.setupButton(".my-fileclip", myCallbackFunction)
+# Javascript
 
-	# Or completely custom
-	$(document).on("click", ".my-fileclip", function() {
-	  // filepicker.pickAndStore ...
-	  // handle setting the value to the input
-	})
+# Using FileClip's JS work
+fileclip = new Fileclip(false)
+fileclip.setupButton(".my-fileclip", myCallbackFunction)
+
+# Or completely custom
+$(document).on("click", ".my-fileclip", function() {
+  // filepicker.pickAndStore ...
+  // handle setting the value to the input
+})
+````
 
 #### Current FilePicker options hardcoded
 * container modal
@@ -106,13 +121,15 @@ Run tests with `rake`.  Post a pull request and make sure there are tests!
 #### Gotchas
 
 These validations will return errors even if the filepicker url is present:
+
 ````
-  validates :attachment, :presence => true
-  validates_attachment_presence :attachment
+validates :attachment, :presence => true
+validates_attachment_presence :attachment
 ````
 
 However, this will work fine.  It'll skip the attachment check if a filepicker url is present and validate if it's not. There's a pending test to fix this.
+
 ````
-  validates :attachment, :attachment_presence => true
-  validates_attachment :attachment, :attachment_presence => true
+validates :attachment, :attachment_presence => true
+validates_attachment :attachment, :attachment_presence => true
 ````
