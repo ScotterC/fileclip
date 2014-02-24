@@ -10,10 +10,10 @@ module FileClip
       # Options
       # js to activate it on the spot, defaults to true
       # class to add css classes
-      def link_to_fileclip(text, form_object, options={}, &block)
+      def link_to_fileclip(attachment, text, form_object, options={}, &block)
         form_object, options = text, form_object if block_given?
 
-        id = fileclip_id(form_object)
+        id = fileclip_id(attachment, form_object)
         classes = fileclip_css_classes(options[:class])
 
         # Got to be a cleaner way to do this
@@ -23,7 +23,7 @@ module FileClip
           link_to text, "javascript:void(0)", class: classes, id: id
         end
 
-        fileclip_link_builder(link, form_object, options, id)
+        fileclip_link_builder(attachment, link, form_object, options, id)
       end
 
       # Add js-fileclip to existing classes
@@ -35,10 +35,9 @@ module FileClip
       end
 
       # Object id for link
-      def fileclip_id(form_object)
+      def fileclip_id(attachment, form_object)
         new_object = form_object.object
-        attachment_name = new_object.attachment_name
-        "#{attachment_name}_#{new_object.object_id}"
+        "#{attachment}_#{new_object.object_id}"
       end
 
       # Return empty tag if it's nil or true
@@ -52,17 +51,13 @@ module FileClip
 
       # Options
       # Activate (defaults to true) to set own javascript
-      # TODO: add to options to add css classes
-      def fileclip_link_builder(link, form_object, options, id)
-        # Get attachment name
-        attachment_name = form_object.object.attachment_name
-
+      def fileclip_link_builder(attachment, link, form_object, options, id)
         js = activation(options[:js], id, options[:callback])
 
         js + link +
-        form_object.hidden_field(:filepicker_url,
+        form_object.hidden_field("#{attachment}_filepicker_url",
                                   class: "js-fileclip_url",
-                                  data: { type: attachment_name })
+                                  data: { type: attachment })
       end
 
     end

@@ -2,20 +2,13 @@ module FileClip
   module Validators
 
     module HelperMethods
-
-      def validates_attachment_content_type(*attr_names)
-        attr_names.last.merge!({ :if => :filepicker_url_not_present? })
-        super(*attr_names)
-      end
-
-      def validates_attachment_presence(*attr_names)
-        attr_names.last.merge!({ :if => :filepicker_url_not_present? })
-        super(*attr_names)
-      end
-
-      def validates_attachment_size(*attr_names)
-        attr_names.last.merge!({ :if => :filepicker_url_not_present? })
-        super(*attr_names)
+      %w{validates_attachment_content_type validates_attachment_presence validates_attachment_size}.each do |method|        
+        define_method(method) do |*attr_names|
+          if method_defined?("#{attr_names.first}_filepicker_url".to_sym)
+            attr_names.last.merge!({ :if => "#{attr_names.first}_filepicker_url_not_present?".to_sym })
+          end
+          super(*attr_names)
+        end
       end
 
     end

@@ -34,6 +34,13 @@ class Image < ActiveRecord::Base
 
   fileclip :attachment
 
+  has_attached_file :other_attachment,
+                    :storage => :filesystem,
+                    :path => "./spec/tmp/:style/:id.:extension",
+                    :url => "./spec/tmp/:style/:id.extension"
+
+  fileclip :other_attachment
+
 end
 
 class DelayedImage < ActiveRecord::Base

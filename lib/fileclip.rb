@@ -14,8 +14,8 @@ module FileClip
 
   class << self
 
-    def process(klass, instance_id)
-      klass.constantize.find(instance_id).process_from_filepicker
+    def process(klass, instance_id, name)
+      klass.constantize.find(instance_id).send("process_#{name}_from_filepicker")
     end
 
     # TODO: replace with checking for delayed options?
@@ -30,112 +30,96 @@ module FileClip
     def sidekiq_enabled?
       !!(defined? Sidekiq)
     end
-
-    def change_keys
-      @@change_keys ||= [:filepicker_url]
-    end
-
   end
 
   module Glue
     def self.included(base)
       base.extend ClassMethods
       base.extend FileClip::Validators::HelperMethods
-      base.send :include, InstanceMethods
     end
   end
 
   module ClassMethods
     def fileclip(name)
-      after_commit  :update_from_filepicker!
+      attr_accessible "#{name}_filepicker_url".to_sym
+      after_commit  "update_#{name}_from_filepicker!".to_sym
 
       set_fileclipped(name)
     end
 
-    def fileclipped
-      @attachment_name
-    end
-
     def set_fileclipped(name)
-      @attachment_name = name
-    end
-  end
 
-  module InstanceMethods
+      class_eval <<-RUBY
 
-    # TODO: can't handle multiples, just given
-    def attachment_name
-      @attachment_name ||= self.class.fileclipped
-    end
-
-    def attachment_object
-      self.send(attachment_name)
-    end
-
-    def update_from_filepicker!
-      if update_from_filepicker?
-        if FileClip.resque_enabled?
-          # TODO: self.class.name is webrick ???
-          process_with_resque!
-        elsif FileClip.sidekiq_enabled?
-          process_with_sidekiq!
-        else
-          process_from_filepicker
+        def update_#{name}_from_filepicker!
+          if update_#{name}_from_filepicker?
+            if FileClip.resque_enabled?
+              # TODO: self.class.name is webrick ???
+              process_#{name}_with_resque!
+            elsif FileClip.sidekiq_enabled?
+              process_#{name}_with_sidekiq!
+            else
+              process_#{name}_from_filepicker
+            end
+          end
         end
-      end
-    end
 
-    def process_with_resque!
-      update_column(:"#{attachment_name}_processing", true) if FileClip.delayed?
-      ::Resque.enqueue(FileClip::Jobs::Resque, self.class.name, self.id)
-    end
+        def process_#{name}_with_resque!
+          update_column(:#{name}_processing, true) if FileClip.delayed?
+          ::Resque.enqueue(FileClip::Jobs::Resque, self.class.name, self.id, :#{name})
+        end
 
-    def process_with_sidekiq!
-      update_column(:"#{attachment_name}_processing", true) if FileClip.delayed?
-      FileClip::Jobs::Sidekiq.perform_async(self.class.name, self.id)
-    end
+        def process_#{name}_with_sidekiq!
+          update_column(:#{name}_processing, true) if FileClip.delayed?
+          FileClip::Jobs::Sidekiq.perform_async(self.class.name, self.id, :#{name})
+        end
 
-    def process_from_filepicker
-      self.class.skip_callback :commit, :after, :update_from_filepicker!
-      self.send(:"#{attachment_name}=", URI.parse(filepicker_url))
-      self.set_metadata
-      self.attachment_object.save_with_prepare_enqueueing if FileClip.delayed?
-      self.save
-      self.enqueue_delayed_processing if FileClip.delayed?
-      self.class.set_callback :commit, :after, :update_from_filepicker!
-    end
+        def process_#{name}_from_filepicker
+          self.class.skip_callback :commit, :after, :update_#{name}_from_filepicker!
+          self.send(:#{name}=, URI.parse(#{name}_filepicker_url))
+          self.set_#{name}_metadata
+          self.send(:#{name}).save_with_prepare_enqueueing if FileClip.delayed?
+          self.save
+          self.enqueue_delayed_processing if FileClip.delayed?
+          self.class.set_callback :commit, :after, :update_#{name}_from_filepicker!
+        end
 
-    def set_metadata
-      metadata = JSON.parse(::RestClient.get filepicker_url + "/metadata")
+        def set_#{name}_metadata
+          result = ::RestClient.get(#{name}_filepicker_url + "/metadata")
+          metadata = JSON.parse(result)
 
-      self.send(:"#{attachment_name}_content_type=",  metadata["mimetype"])
+          self.send("#{name}_content_type=",  metadata["mimetype"])
 
-      # Delegate to paperclips filename cleaner
-      filename = self.attachment_object.send(:cleanup_filename, metadata["filename"])
-      self.send(:"#{attachment_name}_file_name=",     filename)
+          # Delegate to paperclips filename cleaner
+          filename = self.send(:#{name}).send(:cleanup_filename, metadata["filename"])
+          self.send(:#{name}_file_name=,     filename)
 
-      self.send(:"#{attachment_name}_file_size=",     metadata["size"])
-    end
+          self.send(:#{name}_file_size=,     metadata["size"])
+        end
 
-    def update_from_filepicker?
-      fileclip_previously_changed? &&
-      filepicker_url.present? &&
-      !filepicker_only?
-    end
+        def update_#{name}_from_filepicker?
+          #{name}_fileclip_previously_changed? &&
+              #{name}_filepicker_url.present? &&
+              !#{name}_filepicker_only?
+        end
 
-    def filepicker_url_not_present?
-      return true unless self.class.column_names.include? "filepicker_url"
-      !filepicker_url.present?
-    end
+        def #{name}_filepicker_url_not_present?
+          return true unless self.class.column_names.include? "#{name}_filepicker_url"
+          !#{name}_filepicker_url.present?
+        end
 
-    def fileclip_previously_changed?
-      !(previous_changes.keys.map(&:to_sym) & FileClip.change_keys).empty?
-    end
+        def #{name}_fileclip_previously_changed?
+          !(previous_changes.keys.map(&:to_sym) & [:#{name}_filepicker_url]).empty?
+        end
 
-    # To be overridden in model if specific logic for not
-    # processing the image
-    def filepicker_only?
-      false
+        # To be overridden in model if specific logic for not
+        # processing the image
+        def #{name}_filepicker_only?
+          false
+        end
+
+      RUBY
+
     end
   end
 
