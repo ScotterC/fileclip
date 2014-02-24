@@ -1,139 +1,79 @@
 require 'fileclip/configuration'
 require 'fileclip/action_view/helpers'
-require 'fileclip/validators'
+require 'fileclip/action_view/form_helper'
+require 'fileclip/updater'
+require 'fileclip/glue'
 require 'fileclip/engine'
 require 'fileclip/railtie'
-require 'fileclip/jobs/resque'
-require 'fileclip/jobs/sidekiq'
-require 'rest-client'
-
-# TODO: make fileclip methods only load on fileclipped models
 
 module FileClip
-  mattr_accessor :change_keys
 
   class << self
-
-    def process(klass, instance_id)
-      klass.constantize.find(instance_id).process_from_filepicker
+    def process(klass, instance_id, attachment_name)
+      klass.constantize.find(instance_id).process_fileclip!(attachment_name)
     end
 
-    # TODO: replace with checking for delayed options?
-    def delayed?
-      defined?(DelayedPaperclip)
-    end
-
-    def resque_enabled?
-      !!(defined? Resque)
-    end
-
-    def sidekiq_enabled?
+    def delay_enabled?
+      !!(defined? Resque) ||
       !!(defined? Sidekiq)
-    end
-
-    def change_keys
-      @@change_keys ||= [:filepicker_url]
-    end
-
-  end
-
-  module Glue
-    def self.included(base)
-      base.extend ClassMethods
-      base.extend FileClip::Validators::HelperMethods
-      base.send :include, InstanceMethods
     end
   end
 
   module ClassMethods
     def fileclip(name)
-      after_commit  :update_from_filepicker!
+      cattr_accessor :fileclips
+      self.fileclips ||= []
+      self.fileclips.push name
 
-      set_fileclipped(name)
+      after_commit :process_fileclips!
     end
 
-    def fileclipped
-      @attachment_name
-    end
-
-    def set_fileclipped(name)
-      @attachment_name = name
+    # Utility method for processing
+    def without_fileclip_callback(&block)
+      skip_callback :commit, :after, :process_fileclips!
+      yield
+      set_callback  :commit, :after, :process_fileclips!
     end
   end
 
   module InstanceMethods
-
-    # TODO: can't handle multiples, just given
-    def attachment_name
-      @attachment_name ||= self.class.fileclipped
-    end
-
-    def attachment_object
-      self.send(attachment_name)
-    end
-
-    def update_from_filepicker!
-      if update_from_filepicker?
-        if FileClip.resque_enabled?
-          # TODO: self.class.name is webrick ???
-          process_with_resque!
-        elsif FileClip.sidekiq_enabled?
-          process_with_sidekiq!
-        else
-          process_from_filepicker
-        end
+    def process_fileclips!
+      self.class.fileclips.each do |attachment_name|
+        process_fileclip(attachment_name) if update_fileclip?(attachment_name)
       end
     end
 
-    def process_with_resque!
-      update_column(:"#{attachment_name}_processing", true) if FileClip.delayed?
-      ::Resque.enqueue(FileClip::Jobs::Resque, self.class.name, self.id)
+    def process_fileclip(attachment_name)
+      FileClip::Updater.new(self, attachment_name).enqueue
     end
 
-    def process_with_sidekiq!
-      update_column(:"#{attachment_name}_processing", true) if FileClip.delayed?
-      FileClip::Jobs::Sidekiq.perform_async(self.class.name, self.id)
+    def process_fileclip!(attachment_name)
+      FileClip::Updater.new(self, attachment_name).process!
     end
 
-    def process_from_filepicker
-      self.class.skip_callback :commit, :after, :update_from_filepicker!
-      self.send(:"#{attachment_name}=", URI.parse(filepicker_url))
-      self.set_metadata
-      self.attachment_object.save_with_prepare_enqueueing if FileClip.delayed?
-      self.save
-      self.enqueue_delayed_processing if FileClip.delayed?
-      self.class.set_callback :commit, :after, :update_from_filepicker!
+    def fileclip_url_present?(attachment_name)
+      return true unless self.class.column_names.include? fileclip_url(attachment_name)
+      send(fileclip_url(attachment_name)).present?
     end
 
-    def set_metadata
-      metadata = JSON.parse(::RestClient.get filepicker_url + "/metadata")
+    private
 
-      self.send(:"#{attachment_name}_content_type=",  metadata["mimetype"])
-
-      # Delegate to paperclips filename cleaner
-      filename = self.attachment_object.send(:cleanup_filename, metadata["filename"])
-      self.send(:"#{attachment_name}_file_name=",     filename)
-
-      self.send(:"#{attachment_name}_file_size=",     metadata["size"])
-    end
-
-    def update_from_filepicker?
-      fileclip_previously_changed? &&
-      filepicker_url.present? &&
+    def update_fileclip?(attachment_name)
+      fileclip_previously_changed?(attachment_name) &&
+      fileclip_url_present?(attachment_name) &&
       !filepicker_only?
     end
 
-    def filepicker_url_not_present?
-      return true unless self.class.column_names.include? "filepicker_url"
-      !filepicker_url.present?
+    def fileclip_previously_changed?(attachment_name)
+      !(previous_changes.keys & [fileclip_url(attachment_name)]).empty?
     end
 
-    def fileclip_previously_changed?
-      !(previous_changes.keys.map(&:to_sym) & FileClip.change_keys).empty?
+    def fileclip_url(attachment_name)
+      "#{attachment_name}_filepicker_url"
     end
 
-    # To be overridden in model if specific logic for not
-    # processing the image
+    # To be overridden in model if
+    # attachment shouldn't be processed
     def filepicker_only?
       false
     end

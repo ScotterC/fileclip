@@ -6,91 +6,113 @@ A FilePicker / PaperClip mashup.  Use Filepicker for uploads and paperclip to pr
 ### What FileClip Does
 
 FileClip saves a filepicker url to your image table which is then
-processed by paperclip after the object is saved.  This allows filepicker urls with paperclip styles while the image is being processed and the possibility for seamless image handling without having to process anything on your rails servers.
+processed by paperclip after the object is saved.
 
-## Minimum Viable Setup
+#### Note: Breaking Changes when upgrading to 0.5
+
+### Pros:
+* Filepicker URLs with paperclip styles as fallback
+* Seamless image handling while images are processed
+* Easy background processing with no risk of losing files
+* Unobtrusive, Paperclip uploads still work.
+
+## Minimal Viable Setup
 
 ### Add to Paperclip table
-````
-class AddFileClipToImages < ActiveRecord::Migration
-  def up
-    add_column :images, :filepicker_url, :string
-  end
+	# column prefix needs to be paperclip attachment name
+	class AddFileClipToImages < ActiveRecord::Migration
+	  def up
+	    add_column :images, :attachment_filepicker_url, :string
+      add_column :images, :attachment_processing, :boolean
+	  end
 
-  def down
-    remove_column :images, :filepicker_url
-  end
-end
-````
+	  def down
+	    remove_column :images, :attachment_filepicker_url
+      remove_column :images, :attachment_processing
+	  end
+	end
 
 ### In Initializer
-````
-# config/initializers/fileclip.rb
-FileClip.configure do |config|
-  config.filepicker_key = 'XXXXXXXXXXXXXXXXXXX'
-  config.services = ["COMPUTER", "DROPBOX"]     # Defaults to ["COMPUTER"]
-  config.max_size = 20                          # Megabytes, defaults to 20
-  config.storage_path = "/assets/"              # Defaults to "/fileclip/"
-  config.mime_types = "images/jpeg"             # Defaults to "images/*"
-  config.file_access = "private"                # Defaults to "public"
-  config.excluded_environments = []             # Defaults to ["test"]
-  config.default_service = "DROPBOX"            # Defaults to "COMPUTER"
-end
-````
+	# config/initializers/fileclip.rb
+	# Defaults shown
+	FileClip.configure do |config|
+	  config.filepicker_key        = 'XXXXXXXXXXXXXXXXXXX'
+	  config.services              = ["COMPUTER"]
+	  config.max_size              = 20
+	  config.storage_path          = "/fileclip/"
+	  config.mime_types            = "images/*"
+	  config.file_access           = "public"
+	  config.excluded_environments = ["test"]
+	  config.default_service       = "COMPUTER"
+	end
 
 ### In Model
-````
-# models/image.rb
-class Image << ActiveRecord::Base
+	# models/image.rb
+	class Image << ActiveRecord::Base
+	  has_attached_file :attachment
 
-  has_attached_file :attachment
-
-  fileclip :attachment
-end
-````
+	  fileclip :attachment
+	end
 
 ### In View
-````
-# Loads Filepicker js, and FileClip js
-<%= fileclip_js_include_tag %>
+	# Loads Filepicker js, and FileClip js
+	<%= fileclip_js_include_tag %>
 
-<%= form_for(Image.new) do |f| %>
+	 # provides a button that can be styled any way you choose
 
-  # provides a link that can be styled any way you choose
-  # launches filepicker dialog and saves link to hidden field
-  <%= link_to_fileclip "Choose a File", f %>
+	<%= form_for(Image.new) do |f| %>
 
-  <%= f.submit %>
-<% end %>
+	  <%= f.fileclip :attachment, "Choose a File" %>
 
-# Specify a callback function that gets called when Filepicker completes
-<%= link_to_fileclip "Choose a File", f, :callback => 'window.MyApp.filepickerCallback' %>
+	  <%= f.submit %>
+	<% end %>
 
-# For more control you can disable automatic Javascript initialization.
-# You'll need to initialize the FileClip element yourself.
-<%= link_to_fileclip "Choose a File", f, :class => '.my-filepicker', :js => false %>
+	# Specify a callback function that gets called when Filepicker completes
+	<%= f.fileclip :attachment, "Choose a File", :callback => 'window.MyApp.filepickerCallback' %>
 
-# In your Javascript framework
-(new FileClip).button('.my-filepicker');
+### More Control
+	# For more control you can disable automatic JS initialization.
+	# You'll need to add event handlers to the button manually.
+	<%= f.fileclip :attachment, "Choose a File", :class => ".my-fileclip", :activate => false %>
 
-````
+  # Javascript
+
+  # Using FileClip's JS work
+  fileclip = new Fileclip(false)
+  fileclip.setupButton(".my-fileclip", myCallbackFunction)
+
+	# Or completely custom
+	$(document).on("click", ".my-fileclip", function() {
+	  // filepicker.pickAndStore ...
+	  // handle setting the value to the input
+	})
 
 #### Current FilePicker options hardcoded
 * container modal
 * location is S3
 
-Features:
-* Unobtrusive.  Normal paperclip uploads still work
 
+#### Upgrading from < 0.5
+* Upgrade filepicker_url columns to use paperclip column prefixes
+* {attachment_name}_processing boolean column is now required
+* Change views to use formhelper `f.fileclip` instead of `link_to_fileclip`
+* Option of `js: false` is now `activate: false`
+* Custom code hooked into fileclip.js needs to be evaluated carefully
+
+#### Contributing
+If you'd like to contribute a feature or bugfix: Thanks!
+Run tests with `rake`.  Post a pull request and make sure there are tests!
 
 #### Gotchas
 
-This paperclip validation will return errors even if filepicker url is present:
+These validations will return errors even if the filepicker url is present:
 ````
-  validates :attachment, :attachment_presence => true
+  validates :attachment, :presence => true
+  validates_attachment_presence :attachment
 ````
 
-However, this will work fine.  It'll skip the attachment check if a filepicker url is present and validate if it's not.
+However, this will work fine.  It'll skip the attachment check if a filepicker url is present and validate if it's not. There's a pending test to fix this.
 ````
-  validates_attachment :attachment, :size => { :in => 0..1000 }, :presence => true
+  validates :attachment, :attachment_presence => true
+  validates_attachment :attachment, :attachment_presence => true
 ````

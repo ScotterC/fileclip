@@ -1,7 +1,5 @@
 require 'rails'
 
-# TODO: only include it in models that have paperclip attachments
-# But will require restart of server for it to pick up the class on edit
 module FileClip
   class Railtie < ::Rails::Railtie
 
@@ -11,6 +9,7 @@ module FileClip
 
     initializer "fileclip.view_helpers" do
       ::ActionView::Base.send(:include, FileClip::ActionView::Helpers)
+      ::ActionView::Helpers::FormBuilder.send(:include, FileClip::ActionView::FormHelper)
     end
   end
 end

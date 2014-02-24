@@ -1,73 +1,66 @@
 class window.FileClip
-  _clicked_button: ""
-
   @env = ->
     "<%= Rails.env %>"
 
-  constructor: (pickerOptions) ->
-    @pickerOptions = pickerOptions || {}
-
-    excludedEnvs = <%= FileClip.configuration.excluded_environments %>
-    if @inArray(excludedEnvs, FileClip.env()) != -1
-      return false
-
-    @loadFilepicker()
-    filepicker.setKey('<%= FileClip.configuration.filepicker_key %>');
-
-  # For filepicker_helper
-  # Accepts button that to be clicked and optional callback
-  button: (target, callback) ->
-    $(document).on "click", target, =>
-      @buttonHandler(target, callback)
-
-  # Handler to set which button was clicked and to pass on callback
-  # To puicker
-  buttonHandler: (target, callback) ->
-    @_clicked_button = $(target)
-    @picker(callback)
-
-  picker: (callback) =>
-    pickerOptions =
+  constructor: (setup = true) ->
+    @pickerOptions =
       mimetypes: "<%= FileClip.configuration.mime_types %>"
       container: "modal"
       services: <%= FileClip.configuration.services %>
       maxSize: (<%= FileClip.configuration.max_size %> * 1024 * 1024)
       openTo: "<%= FileClip.configuration.default_service %>"
 
-    $.extend(pickerOptions, @pickerOptions)
-
-    filepicker.pickAndStore pickerOptions,
+    @storeOptions =
       location: "S3"
       path: "<%= FileClip.configuration.storage_path %>"
       access: "<%= FileClip.configuration.file_access %>"
-    , (fpfile) =>
-      @imageHandler fpfile, callback
-    , (error) =>
-      if window.console and $.isFunction(window.console.log)
-        window.console.log error.code
 
-  # Accepts a filepicker file and optional callback
-  # Passes file and button clicked to a callback
-  # Target if passed in
-  # id to look up the link where it should be going
-  # or clicked button's next input
-  imageHandler: (fpfile, callback, target) ->
-    file = fpfile[0]
+    # escape if excluded
+    if @inArray(<%= FileClip.configuration.excluded_environments %>, FileClip.env()) != -1
+      return false
 
-    $file_target = if not @_clicked_button
-      $(target).find(".js-fileclip_url")
-    else if @_clicked_button.data("id")
-      $("##{@_clicked_button.data("id")}").next(".js-fileclip_url")
-    else
-      @_clicked_button.next(".js-fileclip_url")
+    @loadFilepicker()
+    filepicker.setKey('<%= FileClip.configuration.filepicker_key %>')
 
-    if $file_target.length > 0
-      $file_target.val file.url
-    else
-      if window.console and $.isFunction(window.console.log)
-        window.console.log "File Failed to Save"
+    if setup
+      for field in $("input[type='fileclip']")
+        do (field) =>
+          @setupButton(field)
 
-    callback(file, @_clicked_button) if callback
+  setupButton: (field, callback = null) ->
+    button = document.createElement("button")
+    button.setAttribute('type', 'button')
+
+    $field = $(field)
+    klass  = $field.data("button-class") || ""
+    id     = $field.data("button-id")    || ""
+    text   = $field.data("button-text")
+
+    # Given Callback in JS overrides template callback
+    callback = callback || eval($field.data("callback"))
+
+    # If activation disabled, no callbacks are run
+    activate = $field.data("activate") || true
+
+    button.innerHTML = text
+    button.className = klass
+    button.setAttribute("id", id)
+
+    field.style.display = "none"
+
+    if activate
+      button.onclick = =>
+        button.blur()
+        filepicker.pickAndStore @pickerOptions, @storeOptions, (fpfile) ->
+          field.value = fpfile[0].url
+          callback() if callback
+        , (error) =>
+          if window.console and $.isFunction(window.console.log)
+            window.console.log error.code
+        return false
+
+    # TODO: don't show button until dialog is loaded?
+    field.parentNode.insertBefore(button, field.nextSibling)
 
   loadFilepicker: ->
     ((a) ->
@@ -84,9 +77,7 @@ class window.FileClip
       f = (a, b) ->
         ->
           b.push [a, arguments]
-
       g = 0
-
       while g < e.length
         d[e[g]] = f(e[g], d._queue)
         g++
@@ -101,3 +92,7 @@ class window.FileClip
       return i  if array[i] is value
       i++
     -1
+
+jQuery ->
+  if $("input[type='fileclip']").length > 0
+    new FileClip
