@@ -4,16 +4,16 @@ class window.FileClip
 
   constructor: (setup = true) ->
     @pickerOptions =
-      mimetypes: "<%= FileClip.configuration.mime_types %>"
-      container: "modal"
-      services: <%= FileClip.configuration.services %>
-      maxSize: (<%= FileClip.configuration.max_size %> * 1024 * 1024)
-      openTo: "<%= FileClip.configuration.default_service %>"
+      mimetypes:  "<%= FileClip.configuration.mime_types %>"
+      container:  "modal"
+      services:   <%= FileClip.configuration.services %>
+      maxSize:    <%= FileClip.configuration.max_size %> * 1024 * 1024
+      openTo:     "<%= FileClip.configuration.default_service %>"
 
     @storeOptions =
       location: "S3"
-      path: "<%= FileClip.configuration.storage_path %>"
-      access: "<%= FileClip.configuration.file_access %>"
+      path:     "<%= FileClip.configuration.storage_path %>"
+      access:   "<%= FileClip.configuration.file_access %>"
 
     # escape if excluded
     if @inArray(<%= FileClip.configuration.excluded_environments %>, FileClip.env()) != -1
@@ -28,12 +28,15 @@ class window.FileClip
           @setupButton(field)
 
   setupButton: (field, callback = null) ->
+    return if field.style.display == "none"
+
     button = document.createElement("button")
     button.setAttribute('type', 'button')
 
     $field = $(field)
     klass  = $field.data("button-class") || ""
     id     = $field.data("button-id")    || ""
+
     text   = $field.data("button-text")
 
     # Given Callback in JS overrides template callback
@@ -43,8 +46,8 @@ class window.FileClip
     activate = $field.data("activate") || true
 
     button.innerHTML = text
-    button.className = klass
-    button.setAttribute("id", id)
+    button.className = klass unless klass == ""
+    button.setAttribute("id", id) unless id == ""
 
     field.style.display = "none"
 

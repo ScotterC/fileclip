@@ -15,6 +15,12 @@ end
 
 require 'rails/all'
 
+# Requires supporting ruby files with custom matchers and macros, etc,
+# in spec/support/ and its subdirectories.
+Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each do |file|
+  require file
+end
+
 # Connect to sqlite
 ActiveRecord::Base.establish_connection(
   "adapter" => "sqlite3",

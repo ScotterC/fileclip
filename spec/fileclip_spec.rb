@@ -50,7 +50,7 @@ describe FileClip do
     describe "fileclip" do
       it "registers callback" do
         Image.fileclip(:image)
-        Image._commit_callbacks.last.filter.should == :process_fileclips!
+        Image._commit_callbacks.to_a.last.filter.should == :process_fileclips!
         Image.fileclips.pop # clear image
       end
 

@@ -8,6 +8,11 @@ A FilePicker / PaperClip mashup.  Use Filepicker for uploads and paperclip to pr
 FileClip saves a filepicker url to your image table which is then
 processed by paperclip after the object is saved.
 
+### Goals
+
+Dropin replacement of file_field with sane defaults of Filepicker JS configured by Rails
+Easy fallbacks of filepicker urls to paperclip urls with little to no change of existing image_tags
+
 #### Note: Breaking Changes when upgrading to 0.5
 
 ### Pros:

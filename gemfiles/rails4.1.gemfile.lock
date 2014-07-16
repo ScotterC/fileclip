@@ -1,5 +1,5 @@
 PATH
-  remote: .
+  remote: ../
   specs:
     fileclip (0.5.0)
       paperclip (>= 3.3)
@@ -168,7 +168,7 @@ DEPENDENCIES
   byebug
   coveralls
   fileclip!
-  rails
+  rails (~> 4.1.4)
   resque
   rspec (= 2.14.1)
   sidekiq

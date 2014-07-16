@@ -2,7 +2,15 @@ require 'spec_helper'
 
 describe FileClip::ActionView::FormHelper do
   let!(:form) do
-    ActionView::Helpers::FormBuilder.new(:image, nil, nil, {}, nil)
+    if rails_4_1_x?
+      ActionView::Helpers::FormBuilder.new(:image, nil, nil, {})
+    else
+      ActionView::Helpers::FormBuilder.new(:image, nil, nil, {}, nil)
+    end
+  end
+
+  let(:helper) do
+    ActionController::Base.new.view_context
   end
 
   describe "#fileclip" do
@@ -41,6 +49,21 @@ describe FileClip::ActionView::FormHelper do
         expect(
           form.fileclip(:attachment, "Button Text", activate: false)
         ).to include attribute
+      end
+    end
+
+    describe "with a block" do
+      before :each do
+        # Not cool
+        form.instance_variable_set("@template", ::ActionView::Base.new)
+      end
+
+      it "appends the block yield" do
+        expect(
+          form.fileclip(:attachment) do
+            helper.content_tag(:p, "Hello World")
+          end
+        ).to include "<p>Hello World</p>"
       end
     end
 

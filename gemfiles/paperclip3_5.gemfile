@@ -3,6 +3,6 @@
 source "http://rubygems.org"
 
 gem "byebug"
-gem "paperclip", "~> 3.5.1"
+gem "paperclip", "~> 3.5.4"
 
-gemspec :path=>"../"
+gemspec :path => "../"
